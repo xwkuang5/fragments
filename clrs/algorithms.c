@@ -162,10 +162,6 @@ int inversion_n_k(int n, int k) {
     return ret;
 }
 
-int* twoSum(int* nums, int numsSize, int target) {
-    
-}
-
 int main(){
     printf("number of inversion is %d\n", inversion_n_k(1, 1));
 }
