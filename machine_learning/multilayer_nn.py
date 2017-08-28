@@ -6,6 +6,7 @@ Created on Sat Aug 19 09:32:25 2017
 @author: louis
 """
 
+import math
 import numpy as np
 import matplotlib.pyplot as plt
 import nn_utilities as utils
@@ -42,6 +43,33 @@ class SimpleNeuralNetwork:
                 self.parameters["W" + str(i)] = np.zeros((layers[i][0], layers[i-1][0]))
                 self.parameters["b" + str(i)] = np.zeros((layers[i][0], 1))
 
+        self.initialize_adam()
+
+    def initialize_adam(self):
+        """
+        Initializes the velocity and squares of gradients as a python dictionary with:
+                    - keys: "dW1", "db1", ..., "dWL", "dbL"
+                    - values: numpy arrays of zeros of the same shape as the corresponding gradients/parameters.
+
+        Updates:
+        velocity -- python dictionary containing the current velocity.
+                        v['dW' + str(l)] = velocity of dWl
+                        v['db' + str(l)] = velocity of dbl
+        squares  -- python dictionary that will contain the exponentially weighted average of the squared gradient.
+                    s["dW" + str(l)] = ...
+                    s["db" + str(l)] = ...
+        """
+
+        L = len(self.parameters) // 2 # number of layers in the neural networks
+        self.velocity = {}
+        self.squares = {}
+
+        # Initialize velocity
+        for l in range(L):
+            self.velocity["dW" + str(l+1)] = np.zeros(self.parameters["W" + str(l+1)].shape)
+            self.velocity["db" + str(l+1)] = np.zeros(self.parameters["b" + str(l+1)].shape)
+            self.squares["dW" + str(l+1)] = np.zeros(self.parameters["W" + str(l+1)].shape)
+            self.squares["db" + str(l+1)] = np.zeros(self.parameters["b" + str(l+1)].shape)
 
 
     def forward_prop(self, X):
@@ -97,13 +125,15 @@ class SimpleNeuralNetwork:
 
         return grads
 
-    def update_parameters(self, grads, learning_rate):
+    def update_parameters(self, grads, beta1, beta2, learning_rate, time, epsilon=1e-8):
         """
         Update parameters using gradient descent
 
         Arguments:
-        grads -- python dictionary containing your gradients, output of L_model_backward
-        learning_rate -- learning rate for gradient descent
+        grads           -- python dictionary containing your gradients, output of L_model_backward
+        beta            -- the momentum hyperparameter, scalar
+        learning_rate   -- the learning rate, scalar
+        time            -- time parameter in the exponentially average equation
 
         Updates:
         parameters -- python dictionary containing your updated parameters
@@ -111,11 +141,24 @@ class SimpleNeuralNetwork:
                       parameters["b" + str(l)] = ...
         """
 
-        for l in range(1, len(self.layers)):
-            self.parameters["W" + str(l)] = self.parameters["W" + str(l)] - learning_rate * grads["dW" + str(l)]
-            self.parameters["b" + str(l)] = self.parameters["b" + str(l)] - learning_rate * grads["db" + str(l)]
+        v_corrected = {}                         # Initializing first moment estimate, python dictionary
+        s_corrected = {}                         # Initializing second moment estimate, python dictionary
 
-    def train(self, X_train, Y_train, X_test, Y_test, learning_rate, weight_decay=0.0, num_iterations=1000, verbose=True):
+        for l in range(1, len(self.layers)):
+            self.velocity["dW" + str(l)] = beta1 * self.velocity["dW" + str(l)] + (1-beta1) * grads["dW" + str(l)]
+            self.velocity["db" + str(l)] = beta1 * self.velocity["db" + str(l)] + (1-beta1) * grads["db" + str(l)]
+            v_corrected["dW" + str(l)] = self.velocity["dW" + str(l)] / (1 - math.pow(beta1, time))
+            v_corrected["db" + str(l)] = self.velocity["db" + str(l)] / (1 - math.pow(beta1, time))
+
+            self.squares["dW" + str(l)] = beta2 * self.squares["dW" + str(l)] + (1-beta2) * np.square(grads["dW" + str(l)])
+            self.squares["db" + str(l)] = beta2 * self.squares["db" + str(l)] + (1-beta2) * np.square(grads["db" + str(l)])
+            s_corrected["dW" + str(l)] = self.squares["dW" + str(l)] / (1 - math.pow(beta2, time))
+            s_corrected["db" + str(l)] = self.squares["db" + str(l)] / (1 - math.pow(beta2, time))
+
+            self.parameters["W" + str(l)] = self.parameters["W" + str(l)] - learning_rate * np.divide(v_corrected["dW" + str(l)], np.sqrt(s_corrected["dW" + str(l)]) + epsilon)
+            self.parameters["b" + str(l)] = self.parameters["b" + str(l)] - learning_rate * np.divide(v_corrected["db" + str(l)], np.sqrt(s_corrected["db" + str(l)]) + epsilon)
+
+    def train(self, X_train, Y_train, X_test, Y_test, mini_batch_size = 64, learning_rate=0.005, beta1=0.9, beta2=0.999, weight_decay=0.0, num_epochs=1000, epsilon=1e-8, verbose=True):
         """
         Trains the neural network as defined in model (self)
 
@@ -126,33 +169,46 @@ class SimpleNeuralNetwork:
         Y_test          -- test "label", one hot vector
         learning_rate   -- learning rate of the gradient descent update rule
         weight_decay    -- weight decay multiplier, default to 0.0
-        num_iterations  -- number of iterations of the optimization loop
+        num_epochs      -- number of epochs of
+        epsilon         -- hyperparameter preventing division by zero in Adam updates
         verbose         -- if True, it prints the cost every 100 steps
 
         Updates:
         parameters -- parameters learnt by the model. They can then be used to predict.
         """
 
-        np.random.seed(1)
         costs = []                         # keep track of cost
 
+        seed = 0
+        time = 1
+
         # Loop (gradient descent)
-        for i in range(0, num_iterations):
+        for i in range(0, num_epochs):
 
-            AL, caches = self.forward_prop(X_train)
+            seed = seed + 1
 
-            cost = utils.compute_cost(AL, Y_train, self.parameters, weight_decay)
+            minibatches = utils.random_mini_batches(X_train, Y_train, "one_hot", mini_batch_size, seed)
 
-            grads = self.back_prop(AL, Y_train, caches, weight_decay)
+            for minibatch in minibatches:
 
-            self.update_parameters(grads, learning_rate)
+                (minibatch_X, minibatch_Y) = minibatch
 
-            if verbose and i % 100 == 0:
-                print ("Cost after iteration %i: %f" %(i, cost))
-                print ("Accuracy on training set after iteration %i : %f" %(i, self.evaluate_performance(X_train, Y_train)))
-                print ("Accuracy on test set after iteration %i : %f" %(i, self.evaluate_performance(X_test, Y_test)))
-            if i % 100 == 0:
-                costs.append(cost)
+                AL, caches = self.forward_prop(minibatch_X)
+
+                cost = utils.compute_cost(AL, minibatch_Y, self.parameters, weight_decay)
+
+                grads = self.back_prop(AL, minibatch_Y, caches, weight_decay)
+
+                self.update_parameters(grads, beta1, beta2, learning_rate, time, epsilon)
+
+                if verbose and time % 100 == 0:
+                    print ("Cost after time %i: %f" %(time, cost))
+                    print ("Accuracy on training set after time %i : %f" %(time, self.evaluate_performance(X_train, Y_train)))
+                    print ("Accuracy on test set after time %i : %f" %(time, self.evaluate_performance(X_test, Y_test)))
+                if time % 100 == 0:
+                    costs.append(cost)
+
+                time = time + 1
 
         # plot the cost
         plt.plot(np.squeeze(costs))

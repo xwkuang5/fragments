@@ -6,6 +6,7 @@ Created on Mon Aug 21 21:23:26 2017
 @author: louis
 """
 
+import math
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import OneHotEncoder
@@ -70,6 +71,58 @@ def convert_to_column_major(data):
     ret = data.transpose()
 
     return ret
+
+def random_mini_batches(X, Y, input_format="one_hot", mini_batch_size = 64, seed = 0):
+    """
+    Creates a list of random minibatches from (X, Y)
+
+    Arguments:
+    X -- input data, of shape (input size, number of examples)
+    Y -- true "label" vector (1 for blue dot / 0 for red dot), of shape (1, number of examples)
+    mini_batch_size -- size of the mini-batches, integer
+
+    Returns:
+    mini_batches -- list of synchronous (mini_batch_X, mini_batch_Y)
+    """
+
+    np.random.seed(seed)            # To make your "random" minibatches the same as ours
+    m = X.shape[1]                  # number of training examples
+    mini_batches = []
+
+    permutation = list(np.random.permutation(m))
+    if input_format == "one_hot":
+        shuffled_X = X[:, permutation]
+        shuffled_Y = Y[:, permutation]
+
+    else:
+        shuffled_X = X[permutation, :]
+        shuffled_Y = Y[permutation, :]
+
+    num_complete_minibatches = math.floor(m/mini_batch_size) # number of mini batches of size mini_batch_size in your partitionning
+    for k in range(0, num_complete_minibatches):
+        if input_format == "one_hot":
+            mini_batch_X = shuffled_X[:,k*mini_batch_size:(k+1)*mini_batch_size]
+            mini_batch_Y = shuffled_Y[:,k*mini_batch_size:(k+1)*mini_batch_size]
+
+        else:
+            mini_batch_X = shuffled_X[k*mini_batch_size:(k+1)*mini_batch_size, :]
+            mini_batch_Y = shuffled_Y[k*mini_batch_size:(k+1)*mini_batch_size, :]
+
+        mini_batch = (mini_batch_X, mini_batch_Y)
+        mini_batches.append(mini_batch)
+
+    if m % mini_batch_size != 0:
+        if input_format == "one_hot":
+            mini_batch_X = shuffled_X[:, -(m % mini_batch_size):]
+            mini_batch_Y = shuffled_Y[:, -(m % mini_batch_size):]
+
+        else:
+            mini_batch_X = shuffled_X[-(m % mini_batch_size):, :]
+            mini_batch_Y = shuffled_Y[-(m % mini_batch_size):, :]
+        mini_batch = (mini_batch_X, mini_batch_Y)
+        mini_batches.append(mini_batch)
+
+    return mini_batches
 
 def plot_decision_boundary(pred_func, X, Y, one_hot_to_idx):
     '''
@@ -173,7 +226,7 @@ def calc_num_parameters(layers):
 def sigmoid(z):
     """
     Arguments:
-    z -- logits, column vector in shape [n_units, 1]
+    z -- net input, column vector in shape [n_units, 1]
 
     Returns:
     ret -- sigmoid function outputs
@@ -186,11 +239,11 @@ def sigmoid(z):
 def sigmoid_cache(z):
     """
     Arguments:
-    z -- logits, column vector in shape [n_units, 1]
+    z -- net input, column vector in shape [n_units, 1]
 
     Returns:
     ret -- sigmoid function outputs
-    cache -- copy of net logits, z
+    cache -- copy of net net input, z
     """
 
     ret = 1. / (1. + np.exp(-z))
@@ -216,7 +269,7 @@ def sigmoid_backward(dA, z):
 def tanh(z):
     """
     Arguments:
-    z -- logits, column vector in shape [n_units, 1]
+    z -- net input, column vector in shape [n_units, 1]
 
     Returns:
     ret -- hyperbolic tangent function outputs
@@ -229,7 +282,7 @@ def tanh(z):
 def relu(z):
     """
     Arguments:
-    z -- logits, column vector in shape [n_units, 1]
+    z -- net input, column vector in shape [n_units, 1]
 
     Returns:
     ret -- rectified linear unit function outputs
@@ -242,11 +295,11 @@ def relu(z):
 def relu_cache(z):
     """
     Arguments:
-    z -- logits, column vector in shape [n_units, 1]
+    z -- net input, column vector in shape [n_units, 1]
 
     Returns:
     ret -- rectified linear unit function outputs
-    cache -- copy of logits, z
+    cache -- copy of net input, z
     """
 
     ret = np.multiply(z, (z >= 0))
@@ -271,7 +324,7 @@ def relu_backward(dA, A):
 def softmax(z):
     """
     Arguments:
-    z -- logits, column vector in shape [n_units, 1]
+    z -- net input, column vector in shape [n_units, 1]
 
     Returns:
     ret -- softmax function outputs computed in a numerically stable way
@@ -284,11 +337,11 @@ def softmax(z):
 def softmax_cache(z):
     """
     Arguments:
-    z -- logits, column vector in shape [n_units, 1]
+    z -- net input, column vector in shape [n_units, 1]
 
     Returns:
     ret -- softmax function outputs computed in a numerically stable way
-    cache -- copy of logits, z
+    cache -- copy of net input, z
     """
 
     log_sum_exp_val = log_sum_exp(z)
@@ -312,9 +365,8 @@ def softmax_backward(dA, A):
     to a matrix ret of shape [n, n, m] where ret[:, :, i] is the covariance matrix of column vector A[:, i]
     Similarly for np.diag and np.dot
     """
-
-    matrix = -np.outer(A, A) + np.diag(A)
-    ret = np.dot(matrix.T, dA)
+    matrix = -np.stack([np.outer(A[:,i], A[:, i]).T for i in range(A.shape[1])]).rollaxis(0, 3) + np.stack([np.diag(A[:,i]) for i in range(A.shape[1])]).rollaxis(0, 3)
+    ret = np.tensordot(matrix, dA, axes=([2], [0]))
 
     return ret
 
