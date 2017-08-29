@@ -279,6 +279,36 @@ def tanh(z):
 
     return ret
 
+def tanh_cache(z):
+    """
+    Arguments:
+    z -- net input, column vector in shape [n_units, 1]
+
+    Returns:
+    ret -- hyperbolic tangent function outputs
+    cache -- copy of net input, z
+    """
+
+    ret = 2 * sigmoid(2 * z) - 1
+    cache = z.copy()
+
+    return ret, cache
+
+def tanh_backward(dA, Z):
+    """
+    Arguments:
+    dA -- gradients of the cost with respect to the post-activations (current layer l)
+    Z  -- cache of the pre-activations (current layer l)
+
+    Returns:
+    ret -- gradients of the cost with respect to the pre-activations (current layer l)
+    """
+
+    activation = tanh(Z)
+    ret = np.multiply(dA, 1 - np.square(activation))
+
+    return ret
+
 def relu(z):
     """
     Arguments:

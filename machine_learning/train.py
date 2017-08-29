@@ -28,7 +28,7 @@ Y_test_one_hot, _, _ = utils.convert_to_one_hot(Y_test, enc)
 
 layers = []
 layers.append((X_train.shape[1], "linear"))
-layers.append((10, "relu"))
+layers.append((10, "tanh"))
 layers.append((Y_train_one_hot.shape[1], "softmax"))
 
 model = SimpleNeuralNetwork(layers, "xavier")

@@ -372,16 +372,18 @@ def linear_activation_forward(A_prev, W, b, activation):
              stored for computing the backward pass efficiently
     """
 
+    Z, linear_cache = linear_forward(A_prev, W, b)
+
     if activation == "sigmoid":
-        Z, linear_cache = linear_forward(A_prev, W, b)
         A, activation_cache = utils.sigmoid_cache(Z)
 
+    elif activation == "tanh":
+        A, activation_cache = utils.tanh_cache(Z)
+
     elif activation == "relu":
-        Z, linear_cache = linear_forward(A_prev, W, b)
         A, activation_cache = utils.relu_cache(Z)
 
     elif activation == "softmax":
-        Z, linear_cache = linear_forward(A_prev, W, b)
         A, activation_cache = utils.softmax_cache(Z)
 
     cache = (linear_cache, activation_cache)
@@ -431,18 +433,20 @@ def linear_activation_backward(dA, cache, activation, weight_decay):
     db      -- Gradient of the cost with respect to b (current layer l), same shape as b
     """
     linear_cache, activation_cache = cache
-    if activation == "relu":
-        dZ = utils.relu_backward(dA, activation_cache)
-        dA_prev, dW, db = linear_backward(dZ, linear_cache, weight_decay)
 
-    elif activation == "sigmoid":
+    if activation == "sigmoid":
         dZ = utils.sigmoid_backward(dA, activation_cache)
-        dA_prev, dW, db = linear_backward(dZ, linear_cache, weight_decay)
 
-    # correct implementation of sotfmax back prop needs tensor operations, the following softmax_backward is incorrect
+    elif activation == "tanh":
+        dZ = utils.tanh_backward(dA, activation_cache)
+
+    elif activation == "relu":
+        dZ = utils.relu_backward(dA, activation_cache)
+
     elif activation == "softmax":
         dZ = utils.softmax_backward(dA, activation_cache)
-        dA_prev, dW, db = linear_backward(dZ, linear_cache, weight_decay)
+
+    dA_prev, dW, db = linear_backward(dZ, linear_cache, weight_decay)
 
     return dA_prev, dW, db
 
