@@ -28,18 +28,20 @@ Y_test_one_hot, _, _ = utils.convert_to_one_hot(Y_test, enc)
 
 layers = []
 layers.append((X_train.shape[1], "linear"))
-layers.append((10, "tanh"))
+layers.append((10, "relu"))
 layers.append((Y_train_one_hot.shape[1], "softmax"))
 
 model = SimpleNeuralNetwork(layers, "xavier")
 
 """
+# gradient check
 grad_check_x = X_train[0, :].reshape(-1, 1)
 grad_check_y = Y_train_one_hot[0, :].reshape(-1, 1)
-model.gradient_check(grad_check_x, grad_check_y, epsilon=1e-7, weight_decay=0.2)
+model.gradient_check(grad_check_x, grad_check_y, epsilon=1e-8, weight_decay=.0)
 """
 
-model.train(X_train.T, Y_train_one_hot.T, X_test.T, Y_test_one_hot.T, mini_batch_size=64, learning_rate=0.005, weight_decay=0., num_epochs=100)
+# model training
+model.train(X_train.T, Y_train_one_hot.T, X_test.T, Y_test_one_hot.T, mini_batch_size=64, learning_rate=0.005, weight_decay=0., num_epochs=1000)
 
 plt.scatter(X_train[:,0], X_train[:,1], s=40, c=Y_train, cmap=plt.cm.Spectral)
 

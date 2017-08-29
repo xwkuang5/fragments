@@ -21,9 +21,10 @@ def compute_cost(y_hats, targets, parameters, weight_decay):
     Returns:
     cost -- cost values on a mini-batch
     """
+
     assert(y_hats.shape[1] == targets.shape[1])
 
-    L = len(parameters) // 2 + 1
+    L = len(parameters) // 3 + 1
 
     cost = -1 * np.mean(np.sum(np.multiply(targets, np.log(y_hats)), axis=0))
     reg_cost = 0
@@ -72,7 +73,7 @@ def convert_to_column_major(data):
 
     return ret
 
-def random_mini_batches(X, Y, input_format="one_hot", mini_batch_size = 64, seed = 0):
+def random_mini_batches(X, Y, input_format="one_hot", mini_batch_size=64, seed=0):
     """
     Creates a list of random minibatches from (X, Y)
 
@@ -85,8 +86,8 @@ def random_mini_batches(X, Y, input_format="one_hot", mini_batch_size = 64, seed
     mini_batches -- list of synchronous (mini_batch_X, mini_batch_Y)
     """
 
-    np.random.seed(seed)            # To make your "random" minibatches the same as ours
-    m = X.shape[1]                  # number of training examples
+    np.random.seed(seed)
+    m = X.shape[1]
     mini_batches = []
 
     permutation = list(np.random.permutation(m))
@@ -98,7 +99,7 @@ def random_mini_batches(X, Y, input_format="one_hot", mini_batch_size = 64, seed
         shuffled_X = X[permutation, :]
         shuffled_Y = Y[permutation, :]
 
-    num_complete_minibatches = math.floor(m/mini_batch_size) # number of mini batches of size mini_batch_size in your partitionning
+    num_complete_minibatches = math.floor(m/mini_batch_size)
     for k in range(0, num_complete_minibatches):
         if input_format == "one_hot":
             mini_batch_X = shuffled_X[:,k*mini_batch_size:(k+1)*mini_batch_size]
@@ -157,7 +158,7 @@ def dictionary_to_vector(parameters, num_parameters):
     Convert the parameter dictionary of a model into a one-dimensional vector
 
     Arguments:
-    parameters      -- {"W1": ..., "W2": ..., "WL": ..., "b1": ..., "b2": ..., "bL": ...}
+    parameters      -- {"W1": ..., "WL": ..., "b1": ..., "bL": ..., "r1": ..., "rL": ...}
     num_parameters  -- total number of learnable parameters in the model
 
     Returns:
@@ -168,6 +169,7 @@ def dictionary_to_vector(parameters, num_parameters):
 
     idx = 0
     for key in sorted(parameters.keys()):
+        # skip activation key words
         if "A" in key:
             continue
         param = parameters[key]
@@ -186,8 +188,9 @@ def vector_to_dictionary(vector, layers):
     layers      -- list of (n_uints, activations) pairs that define network structure, including input layer X
 
     Returns:
-    ret -- parameter dictionary, {"W1": ..., "W2": ..., "WL": ..., "b1": ..., "b2": ..., "bL": ...}
+    ret -- parameter dictionary, {"W1": ..., "WL": ..., "b1": ..., "bL": ..., "r1": ..., "rL": ...}
     """
+
     ret = {}
     idx = 0
 
@@ -202,6 +205,36 @@ def vector_to_dictionary(vector, layers):
         length = layers[l][0]
         ret["b" + str(l)] = vector[idx:idx+length].copy().reshape((layers[l][0], 1))
         idx = idx + length
+
+    # recover rs
+    for l in range(1, len(layers)):
+        length = layers[l][0]
+        ret["r" + str(l)] = vector[idx:idx+length].copy().reshape((layers[l][0], 1))
+        idx = idx + length
+
+    return ret
+
+def batch_norm_helper(Z, r, b, mean, var):
+    """
+    Implements the BN part at test time
+
+    z_norm = (z - mu) / sqrt(var)
+    z_norm_scale = r * z_norm + b
+
+    Arguments:
+        Z       -- linear net inputs, numpy array of shape (size of the current layer, number of examples)
+        r       -- scale vector, numpy array of shape (size of the current layer, 1)
+        b       -- bias vector, numpy array of shape (size of the current layer, 1)
+        mean    -- mean of net input of training set
+        var     -- variance of net input of test set
+
+    Returns:
+        ret     -- batch normalization output
+    """
+
+    Z_norm = np.divide(Z - mean, np.sqrt(var))
+
+    ret = np.multiply(Z_norm, r) + b
 
     return ret
 
@@ -219,7 +252,7 @@ def calc_num_parameters(layers):
 
     ret = 0
     for l in range(1, len(layers)):
-        ret = ret + layers[l][0] * (layers[l-1][0] + 1)
+        ret = ret + layers[l][0] * (layers[l-1][0] + 2)
 
     return ret
 
