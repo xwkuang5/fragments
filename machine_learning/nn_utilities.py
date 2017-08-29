@@ -251,17 +251,17 @@ def sigmoid_cache(z):
 
     return ret, cache
 
-def sigmoid_backward(dA, z):
+def sigmoid_backward(dA, Z):
     """
     Arguments:
     dA -- gradients of the cost with respect to the post-activations (current layer l)
-    z  -- cache of the pre-activations (current layer l)
+    Z  -- cache of the pre-activations (current layer l)
 
     Returns:
     ret -- gradients of the cost with respect to the pre-activations (current layer l)
     """
 
-    activation = sigmoid(z)
+    activation = sigmoid(Z)
     ret = np.multiply(dA, np.multiply(activation, 1-activation))
 
     return ret
@@ -307,17 +307,17 @@ def relu_cache(z):
 
     return ret, cache
 
-def relu_backward(dA, A):
+def relu_backward(dA, Z):
     """
     Arguments:
     dA -- gradients of the cost with respect to the post-activations (current layer l)
-    A  -- cache of the post-activations (current layer l)
+    Z  -- cache of the pre-activations (current layer l)
 
     Returns:
     ret -- gradients of the cost with respect to the pre-activations (current layer l)
     """
 
-    ret = np.multiply(dA, (A > 0))
+    ret = np.multiply(dA, (Z > 0))
 
     return ret
 
@@ -350,23 +350,29 @@ def softmax_cache(z):
 
     return ret, cache
 
-def softmax_backward(dA, A):
+def softmax_backward(dA, Z):
     """
     Arguments:
     dA -- gradients of the cost with respect to the post-activations (current layer l)
-    A  -- cache of the post-activations (current layer l)
+    Z  -- cache of the post-activations (current layer l)
 
     Returns:
     ret -- gradients of the cost with respect to the pre-activations (current layer l)
     """
 
-    """
-    I want np.outer to replaced with a tensor operation that transforms a matrix A of shape [n, m]
-    to a matrix ret of shape [n, n, m] where ret[:, :, i] is the covariance matrix of column vector A[:, i]
-    Similarly for np.diag and np.dot
-    """
-    matrix = -np.stack([np.outer(A[:,i], A[:, i]).T for i in range(A.shape[1])]).rollaxis(0, 3) + np.stack([np.diag(A[:,i]) for i in range(A.shape[1])]).rollaxis(0, 3)
-    ret = np.tensordot(matrix, dA, axes=([2], [0]))
+    A = softmax(Z)
+
+    # mini_batch_size = 1
+    # matrix = -np.outer(A, A) + np.multiply(np.eye(A.shape[0]), A)
+    # ret = np.dot(matrix.T, dA)
+
+    # mini_batch_size > 1
+    # How do I vectorize this?
+    stacked_prev = -np.stack([np.outer(A[:,i], A[:,i]) for i in range(A.shape[1])]) + np.stack([np.multiply(np.eye(A.shape[0]), A[:,i]) for i in range(A.shape[1])])
+    matrix = np.rollaxis(stacked_prev, 0, 3)
+
+    stacked_post = np.stack([np.dot(matrix[:,:,i].T, dA[:,i]) for i in range(dA.shape[1])])
+    ret = np.rollaxis(stacked_post, 0, 2)
 
     return ret
 

@@ -114,7 +114,13 @@ class SimpleNeuralNetwork:
         L = len(caches) # the number of layers excluding input layer
 
         current_cache = caches[L-1]
-        grads["dA" + str(L)], grads["dW" + str(L)], grads["db" + str(L)] = short_cut_softmax(AL, Y, current_cache, weight_decay)
+
+        # Hand coded softmax layer
+        # grads["dA" + str(L)], grads["dW" + str(L)], grads["db" + str(L)] = short_cut_softmax(AL, Y, current_cache, weight_decay)
+
+        # Automatic back prop softmax layer
+        dAL = -np.divide(Y, AL)
+        grads["dA" + str(L)], grads["dW" + str(L)], grads["db" + str(L)] = linear_activation_backward(dAL, current_cache, self.layers[L][1], weight_decay)
 
         for l in reversed(range(L-1)):
             current_cache = caches[l]
