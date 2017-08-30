@@ -83,7 +83,7 @@ class SimpleNeuralNetwork:
             self.squares["db" + str(l)] = np.zeros(self.parameters["b" + str(l)].shape)
 
 
-    def forward_prop(self, X):
+    def forward_prop(self, X, keep_prob):
         """
         Implement forward propagation for the architecture [LINEAR->BN->ACTIVATION]
 
@@ -96,6 +96,7 @@ class SimpleNeuralNetwork:
         """
 
         caches = []
+        drop_caches = []
         A = X
 
         # len(parameters) = 1 (input) + 2 * n_layers
@@ -103,6 +104,19 @@ class SimpleNeuralNetwork:
 
         for i in range(1, L):
             A_prev = A
+
+            if i != L-1:
+                if utils.approx_equal(keep_prob, 1.0):
+                    drop_mask = np.ones(A.shape)
+                    keep_prob = 1
+
+                else:
+                    drop_mask = (np.random.randn(A.shape[0], A.shape[1]) <= keep_prob)
+
+                A = np.multiply(A, drop_mask)
+                A /= keep_prob
+                drop_caches += [drop_mask]
+
             A, cache = linear_activation_forward(A_prev, self.parameters["W" + str(i)], self.parameters["r" + str(i)], self.parameters["b" + str(i)], activation=self.layers[i][1])
 
             # keep track of the mean and variance for use in test time
@@ -114,7 +128,7 @@ class SimpleNeuralNetwork:
 
             caches += [cache]
 
-        return A, caches
+        return A, caches, drop_caches
 
     def forward_prop_test(self, X):
         """
@@ -164,7 +178,7 @@ class SimpleNeuralNetwork:
         return A
 
 
-    def back_prop(self, AL, Y, caches, weight_decay):
+    def back_prop(self, AL, Y, caches, drop_caches, keep_prob, weight_decay):
         """
         Implement the backward propagation for the architecture [LINEAR->BN->ACTIVATION]
 
@@ -192,6 +206,9 @@ class SimpleNeuralNetwork:
         for l in reversed(range(L-1)):
             current_cache = caches[l]
             dA_prev_temp, dW_temp, dr_temp, db_temp = linear_activation_backward(grads["dA" + str(l+2)], current_cache, self.layers[l+1][1], weight_decay)
+            drop_mask = drop_caches[l]
+            dA_prev_temp = np.multiply(dA_prev_temp, drop_mask)
+            dA_prev_temp /= keep_prob
             grads["dA" + str(l+1)] = dA_prev_temp
             grads["dW" + str(l+1)] = dW_temp
             grads["dr" + str(l+1)] = dr_temp
@@ -238,7 +255,7 @@ class SimpleNeuralNetwork:
             self.parameters["r" + str(l)] = self.parameters["r" + str(l)] - learning_rate * np.divide(v_corrected["dr" + str(l)], np.sqrt(s_corrected["dr" + str(l)]) + epsilon)
             self.parameters["b" + str(l)] = self.parameters["b" + str(l)] - learning_rate * np.divide(v_corrected["db" + str(l)], np.sqrt(s_corrected["db" + str(l)]) + epsilon)
 
-    def train(self, X_train, Y_train, X_test, Y_test, mini_batch_size = 64, learning_rate=0.005, beta1=0.9, beta2=0.999, weight_decay=0.0, num_epochs=1000, epsilon=1e-8, verbose=True):
+    def train(self, X_train, Y_train, X_test, Y_test, mini_batch_size = 64, learning_rate=0.005, beta1=0.9, beta2=0.999, weight_decay=0.0, keep_prob=0.5, num_epochs=1000, epsilon=1e-8, verbose=True):
         """
         Trains the neural network as defined in model (self)
 
@@ -273,11 +290,11 @@ class SimpleNeuralNetwork:
 
                 (minibatch_X, minibatch_Y) = minibatch
 
-                AL, caches = self.forward_prop(minibatch_X)
+                AL, caches, drop_caches = self.forward_prop(minibatch_X, keep_prob)
 
                 cost = utils.compute_cost(AL, minibatch_Y, self.parameters, weight_decay)
 
-                grads = self.back_prop(AL, minibatch_Y, caches, weight_decay)
+                grads = self.back_prop(AL, minibatch_Y, caches, drop_caches, keep_prob, weight_decay)
 
                 self.update_parameters(grads, beta1, beta2, learning_rate, time, epsilon)
 
@@ -359,7 +376,7 @@ class SimpleNeuralNetwork:
 
         return ret
 
-    def gradient_check(self, X, Y, epsilon=1e-7, weight_decay=0.0):
+    def gradient_check(self, X, Y, epsilon=1e-7, weight_decay=0.0, keep_prob=1.0):
         """
         Checks if back_prop computes correctly the gradient of the cost output by forward_prop
 
@@ -375,8 +392,8 @@ class SimpleNeuralNetwork:
 
         num_parameters = utils.calc_num_parameters(self.layers)
         parameters_values = utils.dictionary_to_vector(self.parameters, num_parameters)
-        AL, caches = self.forward_prop(X)
-        gradients = self.back_prop(AL, Y, caches, weight_decay)
+        AL, caches, drop_caches = self.forward_prop(X, keep_prob)
+        gradients = self.back_prop(AL, Y, caches, drop_caches, keep_prob, weight_decay)
         grad = utils.dictionary_to_vector(gradients, num_parameters)
 
         J_plus = np.zeros((num_parameters, 1))

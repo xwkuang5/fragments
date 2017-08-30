@@ -19,7 +19,7 @@ plt.rcParams['figure.figsize'] = (5.0, 4.0) # set default size of plots
 plt.rcParams['image.interpolation'] = 'nearest'
 plt.rcParams['image.cmap'] = 'gray'
 
-X_train, Y_train, X_test, Y_test = load_2Dblobs(500, n_center=4, ratio=0.5, one_hot=True)
+X_train, Y_train, X_test, Y_test = load_2Dblobs(5000, n_center=3, ratio=0.5, one_hot=True)
 
 enc = OneHotEncoder(sparse=False)
 # training sample should be large enough to cover all encoding cases
@@ -28,6 +28,8 @@ Y_test_one_hot, _, _ = utils.convert_to_one_hot(Y_test, enc)
 
 layers = []
 layers.append((X_train.shape[1], "linear"))
+layers.append((10, "relu"))
+layers.append((10, "relu"))
 layers.append((10, "relu"))
 layers.append((Y_train_one_hot.shape[1], "softmax"))
 
@@ -41,7 +43,7 @@ model.gradient_check(grad_check_x, grad_check_y, epsilon=1e-8, weight_decay=.0)
 """
 
 # model training
-model.train(X_train.T, Y_train_one_hot.T, X_test.T, Y_test_one_hot.T, mini_batch_size=64, learning_rate=0.005, weight_decay=0., num_epochs=1000)
+model.train(X_train.T, Y_train_one_hot.T, X_test.T, Y_test_one_hot.T, mini_batch_size=64, learning_rate=0.005, weight_decay=0., keep_prob=0.5, num_epochs=100)
 
 plt.scatter(X_train[:,0], X_train[:,1], s=40, c=Y_train, cmap=plt.cm.Spectral)
 

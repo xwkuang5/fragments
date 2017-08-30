@@ -11,6 +11,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import OneHotEncoder
 
+def approx_equal(x, y, epsilon=1e-8):
+    return abs(x - y) < epsilon
+
 def compute_cost(y_hats, targets, parameters, weight_decay):
     """
     Arguments:
