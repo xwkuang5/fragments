@@ -11,7 +11,7 @@ class Node {
 private:
     int *board;
     int blank_pos;
-    const Node *parent;
+    Node *parent;
 
 public:
     Node(int *board) : parent(NULL) {
@@ -24,7 +24,7 @@ public:
         }
     }
 
-    Node(const Node *node) : parent(node) {
+    Node(Node *node) : parent(node) {
         this->board = new int[9];
         for (int i = 0; i < 9; i++) {
             this->board[i] = node->board[i];
@@ -46,7 +46,7 @@ public:
         return ret;
     }
 
-    friend Node* move_left(const Node *node) {
+    friend Node* move_left(Node *node) {
         int blank_pos = node->blank_pos;
         if (blank_pos == 0 || blank_pos == 3 || blank_pos == 6) {
             return NULL;
@@ -59,7 +59,7 @@ public:
         return ret;
     }
 
-    friend Node* move_right(const Node *node) {
+    friend Node* move_right(Node *node) {
         int blank_pos = node->blank_pos;
         if (blank_pos == 2 || blank_pos == 5 || blank_pos == 8) {
             return NULL;
@@ -71,7 +71,7 @@ public:
         return ret;
     }
 
-    friend Node* move_up(const Node *node) {
+    friend Node* move_up(Node *node) {
         int blank_pos = node->blank_pos;
         if (blank_pos == 0 || blank_pos == 1 || blank_pos == 2) {
             return NULL;
@@ -84,7 +84,7 @@ public:
         return ret;
     }
 
-    friend Node* move_down(const Node *node) {
+    friend Node* move_down(Node *node) {
         int blank_pos = node->blank_pos;
         if (blank_pos == 6 || blank_pos == 7 || blank_pos == 8) {
             return NULL;
@@ -97,7 +97,7 @@ public:
         return ret;
     }
 
-    friend vector<Node*> expand_node(const Node *node, const set<string>& closed_list) {
+    friend vector<Node*> expand_node(Node *node, set<string>& closed_list) {
         vector<Node*> ret;
 
         Node *tmp = move_left(node);
@@ -139,7 +139,7 @@ public:
         return ret;
     }
 
-    friend bool goal_node(const Node *node) {
+    friend bool goal_node(Node *node) {
         if (node->blank_pos == 0) {
             for (int i = 1; i < 9; i++) {
                 if (node->board[i] != i) {
@@ -159,6 +159,32 @@ public:
         }
         return false;
     }
+
+    friend void display(Node *node) {
+        std::cout << "-------" << std::endl;
+        for (int i = 0; i < 3; i++) {
+            string tmp = "|";
+            for (int j = i*3; j < (i+1)*3; j++) {
+                tmp = tmp + to_string(node->board[j]) + "|";
+            }
+            std::cout << tmp << std::endl;
+        }
+    }
+
+    friend Node** get_goal_path(Node *node, int &size) {
+        int count = 0;
+        Node *cur = node;
+        while (cur != NULL) { count++; cur = cur->parent; }
+        Node **ret = new Node*[count];
+        size = count;
+        cur = node;
+        while (cur != NULL) {
+            ret[--count] = cur;
+            cur = cur->parent;
+        }
+
+        return ret;
+    }
 };
 
 Node* depth_first_search(Node *start_state) {
@@ -172,6 +198,31 @@ Node* depth_first_search(Node *start_state) {
         std::cout << current->get_name() << std::endl;
         fringe.pop();
         if (goal_node(current)) {
+            // release fringe
+            return current;
+        }
+        closed_list.insert(current->get_name());
+        const vector<Node*>& children = expand_node(current, closed_list);
+        for (int i = 0; i < children.size(); i++) {
+            fringe.push(children[i]);
+        }
+    }
+
+    return NULL;
+}
+
+Node* breadth_first_search(Node *start_state) {
+    queue<Node*> fringe;
+    set<string> closed_list;
+
+    fringe.push(start_state);
+
+    while (!fringe.empty()) {
+        Node *current = fringe.front();
+        std::cout << current->get_name() << std::endl;
+        fringe.pop();
+        if (goal_node(current)) {
+            // release fringe
             return current;
         }
         closed_list.insert(current->get_name());
@@ -185,8 +236,15 @@ Node* depth_first_search(Node *start_state) {
 }
 
 int main() {
-    int init[] = {1, 0, 2, 3, 4, 5, 6, 7, 8};
+    int init[] = {1, 2, 3, 0, 4, 5, 6, 7, 8};
     Node *start_node = new Node(init);
     Node *goal_node = depth_first_search(start_node);
+
+    int size;
+    Node **ret = get_goal_path(goal_node, size);
+    for (int i = 0; i < size; i++) {
+        display(ret[i]);
+    }
+    std::cout << size << std::endl;
     return 0;
 }
