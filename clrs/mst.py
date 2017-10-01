@@ -62,6 +62,7 @@ class Graph:
 
         return mst_cost
 
+
 g = Graph(5)
 g.add_edge(0, 1, 2)
 g.add_edge(0, 2, 2)
