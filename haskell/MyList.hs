@@ -190,3 +190,21 @@ removeAt 1 (x:xs) = xs
 removeAt n (x:xs)
     | n > 0 = x:(removeAt (n-1) xs)
     | n < 0 = removeAt (length (x:xs) + n + 1) (x:xs)
+
+--Problem 21
+insertAt :: a -> [a] -> Int -> [a]
+insertAt elem list 1         = elem:list
+insertAt elem [] n
+        | n == 1    = [elem]
+        | otherwise = error "Insertion at invalid position" 
+insertAt elem (x:xs) n
+        | n <= 0    = error "Insertion at negative index position"
+        | n > 1     = x:insertAt elem xs (n-1)
+
+--Problem 22
+range :: Int -> Int -> [Int]
+range n m 
+        | n > m     = []
+        | otherwise = n:range (n+1) m 
+
+        

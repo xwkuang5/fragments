@@ -30,18 +30,18 @@ int* maximum_cross_middle_subarray(int* array, int low, int mid, int high){
     int left_sum = INT_MIN;
     int sum = 0;
     int i;
-    for(i = mid; i >= low; i--){
+    for (i = mid; i >= low; i--) {
         sum += array[i];
-        if(sum > left_sum){
+        if (sum > left_sum) {
             left_sum = sum;
             result[0] = i;
         }
     }
     int right_sum = INT_MIN;
     sum = 0;
-    for(i = mid + 1; i <= high; i++){
+    for (i = mid + 1; i <= high; i++) {
         sum += array[i];
-        if(sum > right_sum){
+        if (sum > right_sum) {
             right_sum = sum;
             result[1] = i;
         }
