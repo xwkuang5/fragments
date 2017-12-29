@@ -19,7 +19,7 @@ plt.rcParams['figure.figsize'] = (5.0, 4.0) # set default size of plots
 plt.rcParams['image.interpolation'] = 'nearest'
 plt.rcParams['image.cmap'] = 'gray'
 
-X_train, Y_train, X_test, Y_test = load_2Dblobs(5000, n_center=3, ratio=0.5, one_hot=True)
+X_train, Y_train, X_test, Y_test = load_2Dblobs(5000, n_center=5, ratio=0.5, one_hot=True)
 
 enc = OneHotEncoder(sparse=False)
 # training sample should be large enough to cover all encoding cases
