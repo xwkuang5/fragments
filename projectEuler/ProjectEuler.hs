@@ -10,9 +10,9 @@ multipleOfThreeAndFive a
 
 -- Problem 2
 even :: (Integral a) => a -> Bool
-even a
-    | a `mod` 2 == 0    True
-    | otherwise         True
+even a  
+    | a `mod` 2 == 0    = True
+    | otherwise         = False
 
 -- the use of thunk
 -- fibs                         = 0 : 1 : <thunk1>
@@ -30,4 +30,18 @@ fibs = 0 : 1 : zipWith (+) fibs (tail fibs)
 
 -- result = sum $ takeWhile (<4000000) $ filter even fibs
 
+-- Problem 3
+leastPrime :: (Integral a) => a -> [a]
+-- Only need to check until sqrt a, but using round does not work for type checking
+-- Use take 1 because take 1 [] = []
+leastPrime a = take 1 $ filter (\x -> (a `mod` x) == 0) [2..a-1]
 
+findPrimeFactors :: (Integral a) => a -> [a]
+findPrimeFactors 1  = []
+findPrimeFactors n
+    | factors == [] = [n]
+    | otherwise     = factors ++ findPrimeFactors (n `div` (head factors))
+    where factors = leastPrime n
+
+findLargestPrimeFactors :: (Integral a) => a -> a
+findLargestPrimeFactors a = (last . findPrimeFactors) a
