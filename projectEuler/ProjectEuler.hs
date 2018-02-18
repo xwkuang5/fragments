@@ -45,3 +45,22 @@ findPrimeFactors n
 
 findLargestPrimeFactors :: (Integral a) => a -> a
 findLargestPrimeFactors a = (last . findPrimeFactors) a
+
+-- Problem 4
+reverseNumber :: (Integral a) => a -> a -> a
+reverseNumber 0 y = y
+reverseNumber x y = reverseNumber q (r + y * 10)
+    where (q, r) = x `quotRem` 10
+
+isPalindrome :: (Integral a) => a -> Bool
+isPalindrome x = reverseNumber x 0 == x
+
+cartesianProduct :: (Integral a) => [a] -> [a] -> [(a, a)]
+cartesianProduct xs ys = [(x, y) | x <- xs, y <- ys]
+
+tupleProduct :: (Integral a) => (a, a) -> a
+tupleProduct (x, y) = x * y
+
+largestPalindromProduct :: (Integral a) => a -> a
+largestPalindromProduct n = foldl1 max $ filter isPalindrome $ map tupleProduct $ cartesianProduct list list
+    where list = [1..((^) 10 n - 1)]
