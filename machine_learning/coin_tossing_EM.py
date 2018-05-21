@@ -1,11 +1,11 @@
-import numpy as np 
+import numpy as np
 from functools import reduce
 from functools import partial
 
 import matplotlib.pyplot as plt
 
-class CoinTossEMEstimator:
 
+class CoinTossEMEstimator:
     def __init__(self, num_coins, coin_priors):
         """Initialize the estimator
 
@@ -39,7 +39,6 @@ class CoinTossEMEstimator:
 
         # estimate for the parameters of interest, thetas
         self._thetas_hat = None
-
         """
         Q_i(z), i.e., any distribution over the latent variable Z
         If we set Q_i(z) to be P(z|x_i; theta), we get the lower
@@ -75,7 +74,7 @@ class CoinTossEMEstimator:
         liklihood_history : list of float
             history of the log liklihood
         """
-        
+
         self._thetas_hat = thetas
 
         liklihood_history = []
@@ -93,7 +92,7 @@ class CoinTossEMEstimator:
                     break
 
         return self._thetas_hat, thetas_history, liklihood_history
-    
+
     def expectation_step(self, samples):
         """Perform one expectation step of the EM algorithm
 
@@ -107,8 +106,13 @@ class CoinTossEMEstimator:
             samples obtained from the coin tossing experiment
         """
 
-        # compute the conditional probability of the latent variables given the samples and the current theta
-        self._Qi_zk = np.stack([self.p_zk_cond_xi(samples[idx], self._thetas_hat, self._coin_priors) for idx in range(samples.shape[0])])
+        # compute the conditional probability of the latent variables 
+        # given the samples and the current theta
+        self._Qi_zk = np.stack([
+            self.p_zk_cond_xi(samples[idx], self._thetas_hat,
+                              self._coin_priors)
+            for idx in range(samples.shape[0])
+        ])
 
     def maximization_step(self, samples):
         """Perform one maximization step of the EM algorithm
@@ -126,7 +130,11 @@ class CoinTossEMEstimator:
         num_heads_in_samples = np.sum(samples, axis=1, keepdims=False)
 
         # find new thetas that maximize the log p_xi_zk given p_zk_cond_xi
-        self._thetas_hat = np.array([np.dot(self._Qi_zk[:, i], num_heads_in_samples) / (samples.shape[1] * self._Qi_zk[:, i].sum()) for i in range(self._num_coins)])
+        self._thetas_hat = np.array([
+            np.dot(self._Qi_zk[:, i], num_heads_in_samples) /
+            (samples.shape[1] * self._Qi_zk[:, i].sum())
+            for i in range(self._num_coins)
+        ])
 
     def liklihood(self, samples):
         """Calculate the liklihood of the observed samples given the 
@@ -146,7 +154,12 @@ class CoinTossEMEstimator:
 
         p_xi_z_handle = partial(self.p_xi_z, thetas=self._thetas_hat)
 
-        return sum([np.dot(self._Qi_zk[i], np.log(np.divide(p_xi_z_handle(samples[i]), self._Qi_zk[i]))) for i in range(samples.shape[0])])
+        return sum([
+            np.dot(self._Qi_zk[i],
+                   np.log(
+                       np.divide(p_xi_z_handle(samples[i]), self._Qi_zk[i])))
+            for i in range(samples.shape[0])
+        ])
 
     def p_xi_z(self, sample, thetas):
         """Calculate the liklihood of the given sample under different
@@ -168,7 +181,7 @@ class CoinTossEMEstimator:
         """
 
         return np.array([self.p_xi_zk(sample, theta) for theta in thetas])
-    
+
     def p_xi_zk(self, sample, theta):
         """Calculate the liklihood of the given sample under for one
         coin (cluster)
@@ -192,8 +205,9 @@ class CoinTossEMEstimator:
         num_heads = sample.sum()
         num_tails = sample.shape[0] - num_heads
 
-        return reduce(lambda x, y: x*y, np.power([theta, 1-theta], [num_heads, num_tails]))
-    
+        return reduce(lambda x, y: x * y,
+                      np.power([theta, 1 - theta], [num_heads, num_tails]))
+
     def p_zk_cond_xi(self, xi, thetas, priors):
         """Calculate the conditiona distribution p(z_k | x_i; theta)
 
@@ -210,9 +224,13 @@ class CoinTossEMEstimator:
             prior beliefs about the coin selection process. 
         """
 
-        raw_prob = np.array([self.p_xi_zk(xi, thetas[idx])*priors[idx] for idx in range(len(thetas))])
+        raw_prob = np.array([
+            self.p_xi_zk(xi, thetas[idx]) * priors[idx]
+            for idx in range(len(thetas))
+        ])
 
         return raw_prob / raw_prob.sum()
+
 
 """
 Draw <num_experiment> samples from a mixture of bernoulli distribution.
@@ -227,15 +245,20 @@ num_experiment = 100
 coin_to_use = np.random.binomial(n=1, p=0.5, size=num_experiment)
 
 # generate samples from a mixture of bernoulli
-samples = np.stack([np.random.binomial(1, p=thetas[coin], size=num_toss_per_experiment) for coin in coin_to_use])
+samples = np.stack([
+    np.random.binomial(1, p=thetas[coin], size=num_toss_per_experiment)
+    for coin in coin_to_use
+])
 
 # initialize estimator
 estimator = CoinTossEMEstimator(2, [0.5, 0.5])
 
 # perform EM learning
-thetas_hat, thetas_hat_history, liklihood_history = estimator.estimate(samples, [0.0001, 0.9999], 1e-5, 10)
+thetas_hat, thetas_hat_history, liklihood_history = estimator.estimate(
+    samples, [0.0001, 0.9999], 1e-5, 10)
 
-print("Estimated head probabilities for the two coins are {:.2f} and {:.2f}".format(thetas_hat[0], thetas_hat[1]))
+print("Estimated head probabilities for the two coins are {:.2f} and {:.2f}".
+      format(thetas_hat[0], thetas_hat[1]))
 
 # plot log liklihood curve
 fig, axarr = plt.subplots(nrows=2, ncols=1)
