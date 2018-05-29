@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 
 class DecisionNode:
@@ -281,7 +283,7 @@ X_test, y_test = X[2000:], y[2000:]
 X_train, y_train = X[:2000], y[:2000]
 
 # initialize the classifier
-adaboost = AdaBoost(100)
+adaboost = AdaBoost(300)
 
 # train the classifier
 train_history, test_history = adaboost.train(X_train, y_train, X_test, y_test)
@@ -297,3 +299,4 @@ plt.title("Training and testing error of decision stump AdaBoost")
 plt.xlabel("Number of estimators")
 plt.ylabel("Error rate")
 plt.show()
+plt.savefig("figures/AdaBoost300WeakLearners.png")
