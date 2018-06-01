@@ -37,6 +37,7 @@ class disjoint_set:
                 self.parray[pi] = pj
                 self.rank[pj] += 1
 
+
 class Graph:
     def __init__(self, num_nodes):
         self.num_nodes = num_nodes
@@ -72,5 +73,3 @@ g.add_edge(1, 3, 2)
 g.add_edge(1, 4, 3)
 g.add_edge(0, 4, 1)
 print("cost of mst: %d" % g.build_mst_kruskals())
-
-

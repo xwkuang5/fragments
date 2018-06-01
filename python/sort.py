@@ -21,15 +21,17 @@ def randomized_partition(arr, low, high):
 
     return i
 
+
 def qsort(arr, low, high):
     if low < high:
         pivot_loc = randomized_partition(arr, low, high)
-        qsort(arr, low, pivot_loc-1)
-        qsort(arr, pivot_loc+1, high)
+        qsort(arr, low, pivot_loc - 1)
+        qsort(arr, pivot_loc + 1, high)
+
 
 def merge(arr, low, mid, high):
-    left = arr[low:mid+1]
-    right = arr[mid+1:high+1]
+    left = arr[low:mid + 1]
+    right = arr[mid + 1:high + 1]
 
     i = 0
     j = 0
@@ -54,18 +56,22 @@ def merge(arr, low, mid, high):
         j += 1
         k += 1
 
+
 def merge_sort(arr, low, high):
     if low < high:
         mid = int((low + high) / 2)
         merge_sort(arr, low, mid)
-        merge_sort(arr, mid+1, high)
+        merge_sort(arr, mid + 1, high)
         merge(arr, low, mid, high)
+
 
 def left_child(index):
     return 2 * index + 1
 
+
 def right_child(index):
     return 2 * index + 2
+
 
 def min_heapify(arr, index, size):
 
@@ -83,12 +89,14 @@ def min_heapify(arr, index, size):
         arr[index], arr[smallest_idx] = arr[smallest_idx], arr[index]
         min_heapify(arr, smallest_idx, size)
 
+
 def build_heap(arr, size):
     for i in reversed(range(int(size / 2))):
         min_heapify(arr, i, size)
 
+
 def heap_sort(arr, low, high):
-    copy = arr[low:high+1]
+    copy = arr[low:high + 1]
     size = high - low + 1
 
     build_heap(copy, size)
@@ -98,10 +106,11 @@ def heap_sort(arr, low, high):
         size = size - 1
         min_heapify(copy, 0, size)
 
-    arr[low:high+1] = [x for x in reversed(copy)]
+    arr[low:high + 1] = [x for x in reversed(copy)]
+
 
 arr = [2, 1, 2, 4, 7, 5, 2, 6, 10, 8]
 size = len(arr)
 # qsort(arr, 0, size-1)
-heap_sort(arr, 0, size-1)
+heap_sort(arr, 0, size - 1)
 print(arr)

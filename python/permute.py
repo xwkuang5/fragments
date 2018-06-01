@@ -13,8 +13,9 @@ def permute(obj_list, l, r, level):
     else:
         for i in range(l, r):
             obj_list[l], obj_list[i] = obj_list[i], obj_list[l]
-            permute(obj_list, l+1, r, level-1)
+            permute(obj_list, l + 1, r, level - 1)
             obj_list[l], obj_list[i] = obj_list[i], obj_list[l]
+
 
 def nAr(obj_list, n, r):
     """Implement the nAr permutation operation
@@ -28,6 +29,7 @@ def nAr(obj_list, n, r):
     assert len(obj_list) == n and r <= n, "incorrect input!"
 
     permute(obj_list, 0, n, r)
+
 
 obj_list = [1, 2, 3]
 nAr(obj_list, len(obj_list), 2)

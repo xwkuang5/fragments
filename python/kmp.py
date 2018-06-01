@@ -17,6 +17,7 @@ def partial_match_table(string):
                 prev_len = pmt[prev_len - 1]
     return pmt
 
+
 def kmp_match(string, pattern):
     pmt = partial_match_table(pattern)
 
@@ -27,13 +28,13 @@ def kmp_match(string, pattern):
     string_size = len(string)
     pattern_size = len(pattern)
 
-    i = 0 # index for string
-    j = 0 # index for pattern
+    i = 0  # index for string
+    j = 0  # index for pattern
 
     while i < string_size:
         if j == pattern_size:
             match_location.append(i - pattern_size)
-            j = pmt[j-1]
+            j = pmt[j - 1]
             continue
         if string[i] == pattern[j]:
             i += 1
@@ -42,11 +43,12 @@ def kmp_match(string, pattern):
             if j == 0:
                 i += 1
             else:
-                j = pmt[j-1]
+                j = pmt[j - 1]
     if j == pattern_size:
         match_location.append(i - pattern_size)
 
     return match_location
+
 
 text = "AABAACAADAABAABA"
 pattern = "AABA"

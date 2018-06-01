@@ -106,100 +106,71 @@ class Heap:
                 self._bubble_up(parent)
 
 
-class FindKLargest:
-    def __init__(self, k):
-        self._k = k
+class OnlineMedian:
+    def __init__(self):
 
-    @property
-    def k(self):
-        return self._k
+        self._max_heap = Heap([], min_heap=False)
+        self._min_heap = Heap([], min_heap=True)
 
-    def sortAndReturnKLargest(self, list_):
+    def find_median(self, val):
+        """This algorithm implements the O(log(n)) method for finding median
+        of a sequence in an online fashion. The algorithm maintains two heap
+        for bookeeping. A max_heap to store the smaller half of the sequence
+        and a min_heap to store the greater half of the sequence. Median is
+        defined as a_ceiling(n/2). Note that the algorithm only needs to be
+        tweaked a little bit to work for the general definition of median.
+        """
 
-        assert len(list_) >= self._k, "size of list can not be smaller than k"
+        if self._max_heap.size == 0 and self._min_heap.size == 0:
+            self._max_heap.insert(val)
+            return val
 
-        sorted_list_ = sorted(list_)
+        elif self._max_heap.size != 0 and self._min_heap.size == 0:
+            cur_median = self._max_heap.get_top()
 
-        return sorted_list_[-self._k:]
+            if cur_median <= val:
+                self._min_heap.insert(val)
+                return cur_median
+            else:
+                self._min_heap.insert(cur_median)
+                self._max_heap.pop_top()
+                self._max_heap.insert(val)
+                return val
+        else:
+            max_heap_top = self._max_heap.get_top()
+            min_heap_top = self._min_heap.get_top()
 
-    def buildCompleteHeapAndReturnKLargest(self, list_):
-
-        assert len(list_) >= self._k, "size of list can not be smaller than k"
-
-        max_heap = Heap(list_, min_heap=False)
-
-        return [max_heap.pop_top() for _ in range(self._k)]
-
-    def buildHeapOfSizeKAndReturnKLargest(self, list_):
-
-        assert len(list_) >= self._k, "size of list can not be smaller than k"
-
-        min_heap = Heap(list_[:self._k], min_heap=True)
-
-        cur_min = min_heap.get_top()
-
-        for i in range(self._k, len(list_)):
-            if list_[i] > cur_min:
-                min_heap.pop_top()
-                min_heap.insert(list_[i])
-                cur_min = min_heap.get_top()
-
-        return min_heap._arr
-
-
-def iterate_heap(heap):
-
-    heap_copy = copy.deepcopy(heap)
-
-    ret = []
-
-    while heap_copy.size != 0:
-        ret.append(heap_copy.pop_top())
-
-    print(ret)
+            if val <= max_heap_top:
+                if self._max_heap.size == self._min_heap.size:
+                    self._max_heap.insert(val)
+                    return max_heap_top
+                else:
+                    self._min_heap.insert(max_heap_top)
+                    self._max_heap.pop_top()
+                    self._max_heap.insert(val)
+                    return self._max_heap.get_top()
+            elif max_heap_top < val < min_heap_top:
+                if self._max_heap.size == self._min_heap.size:
+                    self._max_heap.insert(val)
+                    return val
+                else:
+                    self._min_heap.insert(val)
+                    return max_heap_top
+            else:
+                if self._max_heap.size == self._min_heap.size:
+                    self._max_heap.insert(min_heap_top)
+                    self._min_heap.pop_top()
+                    self._min_heap.insert(val)
+                    return min_heap_top
+                else:
+                    self._min_heap.insert(val)
+                    return max_heap_top
 
 
-import time
-import numpy as np
-from functools import partial
+online_median = OnlineMedian()
 
-n = 1000000
-random_seq = list(np.random.randint(0, 10000, size=n))
+seq = [15, 10, 1, 20, 30]
 
-history = []
+ret = [online_median.find_median(val) for val in seq]
 
-x_seq = [2**i for i in range(18)]
-
-for k in x_seq:
-
-    dummy = FindKLargest(k)
-
-    func_list = [
-        partial(dummy.sortAndReturnKLargest),
-        partial(dummy.buildCompleteHeapAndReturnKLargest),
-        partial(dummy.buildHeapOfSizeKAndReturnKLargest)
-    ]
-
-    k_history = []
-
-    for func in func_list:
-
-        start = time.time()
-
-        _ = func(random_seq)
-
-        k_history.append(time.time() - start)
-
-    history.append(k_history)
-
-history = np.array(history).reshape(3, -1)
-
-plt.plot(x_seq, history[0], 'r', label='sorting')
-plt.plot(x_seq, history[1], 'b', label='build large heap')
-plt.plot(x_seq, history[2], 'g', label='build small heap')
-plt.xticks(x_seq)
-
-plt.legend()
-plt.title("runtime of different method for finding k largest elements")
-
-plt.savefig("figures/k_largest_runtime.png")
+print(ret)
