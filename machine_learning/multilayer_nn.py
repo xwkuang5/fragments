@@ -11,6 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import nn_utilities as utils
 
+
 class SimpleNeuralNetwork:
     def __init__(self, layers, initialization="he"):
         """
@@ -27,21 +28,27 @@ class SimpleNeuralNetwork:
         self.parameters = {}
 
         self.bn_beta = 0.9  # batch normalization multiplier for mean and variance -> remember 1 / (1 - bn_beta) days
-        self.bn_mean = {}   # mean of net input of training set
-        self.bn_var = {}    # variance of net input of test set
+        self.bn_mean = {}  # mean of net input of training set
+        self.bn_var = {}  # variance of net input of test set
 
         for i in range(1, len(self.layers)):
             if initialization == "random":
-                self.parameters["W" + str(i)] = np.random.randn(layers[i][0], layers[i-1][0]) * 0.01
+                self.parameters["W" + str(i)] = np.random.randn(
+                    layers[i][0], layers[i - 1][0]) * 0.01
 
             elif initialization == "he":
-                self.parameters["W" + str(i)] = np.random.randn(layers[i][0], layers[i-1][0]) * np.sqrt(2. / layers[i-1][0])
+                self.parameters["W" + str(i)] = np.random.randn(
+                    layers[i][0], layers[i - 1][0]) * np.sqrt(
+                        2. / layers[i - 1][0])
 
             elif initialization == "xavier":
-                self.parameters["W" + str(i)] = np.random.randn(layers[i][0], layers[i-1][0]) * np.sqrt(2. / (layers[i-1][0] + layers[i][0]))
+                self.parameters["W" + str(i)] = np.random.randn(
+                    layers[i][0], layers[i - 1][0]) * np.sqrt(
+                        2. / (layers[i - 1][0] + layers[i][0]))
 
             elif initialization == "zero":
-                self.parameters["W" + str(i)] = np.zeros((layers[i][0], layers[i-1][0]))
+                self.parameters["W" + str(i)] = np.zeros((layers[i][0],
+                                                          layers[i - 1][0]))
 
             # initialize batch normalization layers to have zero mean and unit variance
             self.bn_var["l" + str(i)] = np.ones((layers[i][0], 1))
@@ -75,13 +82,18 @@ class SimpleNeuralNetwork:
 
         # Initialize velocity
         for l in range(1, L):
-            self.velocity["dW" + str(l)] = np.zeros(self.parameters["W" + str(l)].shape)
-            self.velocity["dr" + str(l)] = np.zeros(self.parameters["r" + str(l)].shape)
-            self.velocity["db" + str(l)] = np.zeros(self.parameters["b" + str(l)].shape)
-            self.squares["dW" + str(l)] = np.zeros(self.parameters["W" + str(l)].shape)
-            self.squares["dr" + str(l)] = np.zeros(self.parameters["r" + str(l)].shape)
-            self.squares["db" + str(l)] = np.zeros(self.parameters["b" + str(l)].shape)
-
+            self.velocity["dW" + str(l)] = np.zeros(
+                self.parameters["W" + str(l)].shape)
+            self.velocity["dr" + str(l)] = np.zeros(
+                self.parameters["r" + str(l)].shape)
+            self.velocity["db" + str(l)] = np.zeros(
+                self.parameters["b" + str(l)].shape)
+            self.squares["dW" + str(l)] = np.zeros(
+                self.parameters["W" + str(l)].shape)
+            self.squares["dr" + str(l)] = np.zeros(
+                self.parameters["r" + str(l)].shape)
+            self.squares["db" + str(l)] = np.zeros(
+                self.parameters["b" + str(l)].shape)
 
     def forward_prop(self, X, keep_prob):
         """
@@ -105,26 +117,36 @@ class SimpleNeuralNetwork:
         for i in range(1, L):
             A_prev = A
 
-            if i != L-1:
+            if i != L - 1:
                 if utils.approx_equal(keep_prob, 1.0):
                     drop_mask = np.ones(A.shape)
                     keep_prob = 1
 
                 else:
-                    drop_mask = (np.random.randn(A.shape[0], A.shape[1]) <= keep_prob)
+                    drop_mask = (np.random.randn(A.shape[0], A.shape[1]) <=
+                                 keep_prob)
 
                 A = np.multiply(A, drop_mask)
                 A /= keep_prob
                 drop_caches += [drop_mask]
 
-            A, cache = linear_activation_forward(A_prev, self.parameters["W" + str(i)], self.parameters["r" + str(i)], self.parameters["b" + str(i)], activation=self.layers[i][1])
+            A, cache = linear_activation_forward(
+                A_prev,
+                self.parameters["W" + str(i)],
+                self.parameters["r" + str(i)],
+                self.parameters["b" + str(i)],
+                activation=self.layers[i][1])
 
             # keep track of the mean and variance for use in test time
             (linear_cache, batch_norm_cache, activation_cache) = cache
             (Z, r, b, mean, var) = batch_norm_cache
             # no correction is done for the exponentially weighted average
-            self.bn_mean["l" + str(i)] = self.bn_beta * self.bn_mean["l" + str(i)] + (1-self.bn_beta) * mean
-            self.bn_var["l" + str(i)] = self.bn_beta * self.bn_var["l" + str(i)] + (1-self.bn_beta) * var
+            self.bn_mean[
+                "l" + str(i)] = self.bn_beta * self.bn_mean["l" + str(i)] + (
+                    1 - self.bn_beta) * mean
+            self.bn_var[
+                "l" + str(i)] = self.bn_beta * self.bn_var["l" + str(i)] + (
+                    1 - self.bn_beta) * var
 
             caches += [cache]
 
@@ -153,7 +175,8 @@ class SimpleNeuralNetwork:
 
         for i in range(1, L):
             A_prev = A
-            Z, linear_cache = linear_forward(A_prev, self.parameters["W" + str(i)])
+            Z, linear_cache = linear_forward(A_prev,
+                                             self.parameters["W" + str(i)])
 
             r = self.parameters["r" + str(i)]
             b = self.parameters["b" + str(i)]
@@ -177,7 +200,6 @@ class SimpleNeuralNetwork:
 
         return A
 
-
     def back_prop(self, AL, Y, caches, drop_caches, keep_prob, weight_decay):
         """
         Implement the backward propagation for the architecture [LINEAR->BN->ACTIVATION]
@@ -196,27 +218,37 @@ class SimpleNeuralNetwork:
                  grads["db" + str(l)] = ...
         """
         grads = {}
-        L = len(caches) # the number of layers excluding input layer
+        L = len(caches)  # the number of layers excluding input layer
 
-        current_cache = caches[L-1]
+        current_cache = caches[L - 1]
 
         dAL = -np.divide(Y, AL)
-        grads["dA" + str(L)], grads["dW" + str(L)], grads["dr" + str(L)], grads["db" + str(L)] = linear_activation_backward(dAL, current_cache, self.layers[L][1], weight_decay)
+        grads["dA" + str(L)], grads["dW" + str(L)], grads[
+            "dr" + str(L)], grads["db" + str(L)] = linear_activation_backward(
+                dAL, current_cache, self.layers[L][1], weight_decay)
 
-        for l in reversed(range(L-1)):
+        for l in reversed(range(L - 1)):
             current_cache = caches[l]
-            dA_prev_temp, dW_temp, dr_temp, db_temp = linear_activation_backward(grads["dA" + str(l+2)], current_cache, self.layers[l+1][1], weight_decay)
+            dA_prev_temp, dW_temp, dr_temp, db_temp = linear_activation_backward(
+                grads["dA" + str(l + 2)], current_cache, self.layers[l + 1][1],
+                weight_decay)
             drop_mask = drop_caches[l]
             dA_prev_temp = np.multiply(dA_prev_temp, drop_mask)
             dA_prev_temp /= keep_prob
-            grads["dA" + str(l+1)] = dA_prev_temp
-            grads["dW" + str(l+1)] = dW_temp
-            grads["dr" + str(l+1)] = dr_temp
-            grads["db" + str(l+1)] = db_temp
+            grads["dA" + str(l + 1)] = dA_prev_temp
+            grads["dW" + str(l + 1)] = dW_temp
+            grads["dr" + str(l + 1)] = dr_temp
+            grads["db" + str(l + 1)] = db_temp
 
         return grads
 
-    def update_parameters(self, grads, beta1, beta2, learning_rate, time, epsilon=1e-8):
+    def update_parameters(self,
+                          grads,
+                          beta1,
+                          beta2,
+                          learning_rate,
+                          time,
+                          epsilon=1e-8):
         """
         Update parameters using gradient descent
 
@@ -233,29 +265,71 @@ class SimpleNeuralNetwork:
                       parameters["b" + str(l)] = ...
         """
 
-        v_corrected = {}                         # Initializing first moment estimate, python dictionary
-        s_corrected = {}                         # Initializing second moment estimate, python dictionary
+        v_corrected = {
+        }  # Initializing first moment estimate, python dictionary
+        s_corrected = {
+        }  # Initializing second moment estimate, python dictionary
 
         for l in range(1, len(self.layers)):
-            self.velocity["dW" + str(l)] = beta1 * self.velocity["dW" + str(l)] + (1-beta1) * grads["dW" + str(l)]
-            self.velocity["dr" + str(l)] = beta1 * self.velocity["dr" + str(l)] + (1-beta1) * grads["dr" + str(l)]
-            self.velocity["db" + str(l)] = beta1 * self.velocity["db" + str(l)] + (1-beta1) * grads["db" + str(l)]
-            v_corrected["dW" + str(l)] = self.velocity["dW" + str(l)] / (1 - math.pow(beta1, time))
-            v_corrected["dr" + str(l)] = self.velocity["dr" + str(l)] / (1 - math.pow(beta1, time))
-            v_corrected["db" + str(l)] = self.velocity["db" + str(l)] / (1 - math.pow(beta1, time))
+            self.velocity["dW"
+                          + str(l)] = beta1 * self.velocity["dW" + str(l)] + (
+                              1 - beta1) * grads["dW" + str(l)]
+            self.velocity["dr"
+                          + str(l)] = beta1 * self.velocity["dr" + str(l)] + (
+                              1 - beta1) * grads["dr" + str(l)]
+            self.velocity["db"
+                          + str(l)] = beta1 * self.velocity["db" + str(l)] + (
+                              1 - beta1) * grads["db" + str(l)]
+            v_corrected["dW" + str(l)] = self.velocity["dW" + str(l)] / (
+                1 - math.pow(beta1, time))
+            v_corrected["dr" + str(l)] = self.velocity["dr" + str(l)] / (
+                1 - math.pow(beta1, time))
+            v_corrected["db" + str(l)] = self.velocity["db" + str(l)] / (
+                1 - math.pow(beta1, time))
 
-            self.squares["dW" + str(l)] = beta2 * self.squares["dW" + str(l)] + (1-beta2) * np.square(grads["dW" + str(l)])
-            self.squares["dr" + str(l)] = beta2 * self.squares["dr" + str(l)] + (1-beta2) * np.square(grads["dr" + str(l)])
-            self.squares["db" + str(l)] = beta2 * self.squares["db" + str(l)] + (1-beta2) * np.square(grads["db" + str(l)])
-            s_corrected["dW" + str(l)] = self.squares["dW" + str(l)] / (1 - math.pow(beta2, time))
-            s_corrected["dr" + str(l)] = self.squares["dr" + str(l)] / (1 - math.pow(beta2, time))
-            s_corrected["db" + str(l)] = self.squares["db" + str(l)] / (1 - math.pow(beta2, time))
+            self.squares["dW"
+                         + str(l)] = beta2 * self.squares["dW" + str(l)] + (
+                             1 - beta2) * np.square(grads["dW" + str(l)])
+            self.squares["dr"
+                         + str(l)] = beta2 * self.squares["dr" + str(l)] + (
+                             1 - beta2) * np.square(grads["dr" + str(l)])
+            self.squares["db"
+                         + str(l)] = beta2 * self.squares["db" + str(l)] + (
+                             1 - beta2) * np.square(grads["db" + str(l)])
+            s_corrected["dW" + str(l)] = self.squares["dW" + str(l)] / (
+                1 - math.pow(beta2, time))
+            s_corrected["dr" + str(l)] = self.squares["dr" + str(l)] / (
+                1 - math.pow(beta2, time))
+            s_corrected["db" + str(l)] = self.squares["db" + str(l)] / (
+                1 - math.pow(beta2, time))
 
-            self.parameters["W" + str(l)] = self.parameters["W" + str(l)] - learning_rate * np.divide(v_corrected["dW" + str(l)], np.sqrt(s_corrected["dW" + str(l)]) + epsilon)
-            self.parameters["r" + str(l)] = self.parameters["r" + str(l)] - learning_rate * np.divide(v_corrected["dr" + str(l)], np.sqrt(s_corrected["dr" + str(l)]) + epsilon)
-            self.parameters["b" + str(l)] = self.parameters["b" + str(l)] - learning_rate * np.divide(v_corrected["db" + str(l)], np.sqrt(s_corrected["db" + str(l)]) + epsilon)
+            self.parameters["W" + str(l)] = self.parameters["W" + str(
+                l)] - learning_rate * np.divide(
+                    v_corrected["dW" + str(l)],
+                    np.sqrt(s_corrected["dW" + str(l)]) + epsilon)
+            self.parameters["r" + str(l)] = self.parameters["r" + str(
+                l)] - learning_rate * np.divide(
+                    v_corrected["dr" + str(l)],
+                    np.sqrt(s_corrected["dr" + str(l)]) + epsilon)
+            self.parameters["b" + str(l)] = self.parameters["b" + str(
+                l)] - learning_rate * np.divide(
+                    v_corrected["db" + str(l)],
+                    np.sqrt(s_corrected["db" + str(l)]) + epsilon)
 
-    def train(self, X_train, Y_train, X_test, Y_test, mini_batch_size = 64, learning_rate=0.005, beta1=0.9, beta2=0.999, weight_decay=0.0, keep_prob=0.5, num_epochs=1000, epsilon=1e-8, verbose=True):
+    def train(self,
+              X_train,
+              Y_train,
+              X_test,
+              Y_test,
+              mini_batch_size=64,
+              learning_rate=0.005,
+              beta1=0.9,
+              beta2=0.999,
+              weight_decay=0.0,
+              keep_prob=0.5,
+              num_epochs=1000,
+              epsilon=1e-8,
+              verbose=True):
         """
         Trains the neural network as defined in model (self)
 
@@ -274,7 +348,7 @@ class SimpleNeuralNetwork:
         parameters -- parameters learnt by the model. They can then be used to predict.
         """
 
-        costs = []                         # keep track of cost
+        costs = []  # keep track of cost
 
         seed = 0
         time = 1
@@ -284,24 +358,31 @@ class SimpleNeuralNetwork:
 
             seed = seed + 1
 
-            minibatches = utils.random_mini_batches(X_train, Y_train, "one_hot", mini_batch_size, seed)
+            minibatches = utils.random_mini_batches(
+                X_train, Y_train, "one_hot", mini_batch_size, seed)
 
             for minibatch in minibatches:
 
                 (minibatch_X, minibatch_Y) = minibatch
 
-                AL, caches, drop_caches = self.forward_prop(minibatch_X, keep_prob)
+                AL, caches, drop_caches = self.forward_prop(
+                    minibatch_X, keep_prob)
 
-                cost = utils.compute_cost(AL, minibatch_Y, self.parameters, weight_decay)
+                cost = utils.compute_cost(AL, minibatch_Y, self.parameters,
+                                          weight_decay)
 
-                grads = self.back_prop(AL, minibatch_Y, caches, drop_caches, keep_prob, weight_decay)
+                grads = self.back_prop(AL, minibatch_Y, caches, drop_caches,
+                                       keep_prob, weight_decay)
 
-                self.update_parameters(grads, beta1, beta2, learning_rate, time, epsilon)
+                self.update_parameters(grads, beta1, beta2, learning_rate,
+                                       time, epsilon)
 
                 if verbose and time % 100 == 0:
-                    print ("Cost after time %i: %f" %(time, cost))
-                    print ("Accuracy on training set after time %i : %f" %(time, self.evaluate_performance(X_train, Y_train)))
-                    print ("Accuracy on test set after time %i : %f" %(time, self.evaluate_performance(X_test, Y_test)))
+                    print("Cost after time %i: %f" % (time, cost))
+                    print("Accuracy on training set after time %i : %f" %
+                          (time, self.evaluate_performance(X_train, Y_train)))
+                    print("Accuracy on test set after time %i : %f" %
+                          (time, self.evaluate_performance(X_test, Y_test)))
                 if time % 100 == 0:
                     costs.append(cost)
 
@@ -335,10 +416,9 @@ class SimpleNeuralNetwork:
 
         ret = correct / y_hats_one_hot.shape[1]
 
-        assert(isinstance(ret, float))
+        assert (isinstance(ret, float))
 
         return ret
-
 
     def predict_class_output(self, x, mapping):
         """
@@ -376,7 +456,12 @@ class SimpleNeuralNetwork:
 
         return ret
 
-    def gradient_check(self, X, Y, epsilon=1e-7, weight_decay=0.0, keep_prob=1.0):
+    def gradient_check(self,
+                       X,
+                       Y,
+                       epsilon=1e-7,
+                       weight_decay=0.0,
+                       keep_prob=1.0):
         """
         Checks if back_prop computes correctly the gradient of the cost output by forward_prop
 
@@ -391,9 +476,11 @@ class SimpleNeuralNetwork:
         """
 
         num_parameters = utils.calc_num_parameters(self.layers)
-        parameters_values = utils.dictionary_to_vector(self.parameters, num_parameters)
+        parameters_values = utils.dictionary_to_vector(self.parameters,
+                                                       num_parameters)
         AL, caches, drop_caches = self.forward_prop(X, keep_prob)
-        gradients = self.back_prop(AL, Y, caches, drop_caches, keep_prob, weight_decay)
+        gradients = self.back_prop(AL, Y, caches, drop_caches, keep_prob,
+                                   weight_decay)
         grad = utils.dictionary_to_vector(gradients, num_parameters)
 
         J_plus = np.zeros((num_parameters, 1))
@@ -405,15 +492,19 @@ class SimpleNeuralNetwork:
 
             thetaplus = np.copy(parameters_values)
             thetaplus[i][0] = thetaplus[i][0] + epsilon
-            self.parameters = utils.vector_to_dictionary(thetaplus, self.layers)
+            self.parameters = utils.vector_to_dictionary(
+                thetaplus, self.layers)
             AL = self.forward_prop_test(X)
-            J_plus[i]  = utils.compute_cost(AL, Y, self.parameters, weight_decay)
+            J_plus[i] = utils.compute_cost(AL, Y, self.parameters,
+                                           weight_decay)
 
             thetaminus = np.copy(parameters_values)
             thetaminus[i][0] = thetaminus[i][0] - epsilon
-            self.parameters = utils.vector_to_dictionary(thetaminus, self.layers)
+            self.parameters = utils.vector_to_dictionary(
+                thetaminus, self.layers)
             AL = self.forward_prop_test(X)
-            J_minus[i]  = utils.compute_cost(AL, Y, self.parameters, weight_decay)
+            J_minus[i] = utils.compute_cost(AL, Y, self.parameters,
+                                            weight_decay)
 
             gradapprox[i] = (J_plus[i] - J_minus[i]) / (2 * epsilon)
 
@@ -422,11 +513,18 @@ class SimpleNeuralNetwork:
         difference = numerator / denominator
 
         if difference > 1e-7:
-            print ("\033[93m" + "There is a mistake in the backward propagation! difference = " + str(difference) + "\033[0m")
+            print(
+                "\033[93m" +
+                "There is a mistake in the backward propagation! difference = "
+                + str(difference) + "\033[0m")
         else:
-            print ("\033[92m" + "Your backward propagation works perfectly fine! difference = " + str(difference) + "\033[0m")
+            print(
+                "\033[92m" +
+                "Your backward propagation works perfectly fine! difference = "
+                + str(difference) + "\033[0m")
 
         return difference
+
 
 def linear_forward(A, W):
     """
@@ -448,6 +546,7 @@ def linear_forward(A, W):
     cache = (A, W)
 
     return Z, cache
+
 
 def batch_norm_forward(Z, r, b, epsilon=1e-8):
     """
@@ -482,6 +581,7 @@ def batch_norm_forward(Z, r, b, epsilon=1e-8):
     ret = np.multiply(ret, r) + b
 
     return ret, cache
+
 
 def linear_activation_forward(A_prev, W, r, b, activation):
     """
@@ -520,6 +620,7 @@ def linear_activation_forward(A_prev, W, r, b, activation):
 
     return A, cache
 
+
 def batch_norm_backward(dZ_norm_scale, cache):
     """
     Implement the BN portion of backward propagation for a single layer (layer l)
@@ -545,6 +646,7 @@ def batch_norm_backward(dZ_norm_scale, cache):
 
     return dZ, dr, db
 
+
 def linear_backward(dZ, cache, weight_decay):
     """
     Implement the linear portion of backward propagation for a single layer (layer l)
@@ -562,10 +664,11 @@ def linear_backward(dZ, cache, weight_decay):
     A_prev, W = cache
     m = A_prev.shape[1]
 
-    dW = 1./m * (np.dot(dZ, A_prev.T) + weight_decay * W)
+    dW = 1. / m * (np.dot(dZ, A_prev.T) + weight_decay * W)
     dA_prev = np.dot(W.T, dZ)
 
     return dA_prev, dW
+
 
 def linear_activation_backward(dA, cache, activation, weight_decay):
     """

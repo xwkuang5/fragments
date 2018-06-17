@@ -178,6 +178,7 @@ n_distributions = 3
 distribution_choice = np.random.choice(
     np.arange(3), p=[0.3, 0.4, 0.3], size=sample_size)
 
+
 # Generate samples from a mixture of gaussians
 def generate_samples(means, stds, distribution_choice):
 

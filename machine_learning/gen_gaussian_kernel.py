@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import cv2
 from scipy.stats import multivariate_normal
 
+
 def genGaussianKernel(height, width, ptsList, humanHeight=10):
     densityMap = np.zeros((height, width))
     xlim = (0, width)
@@ -32,11 +33,13 @@ def genGaussianKernel(height, width, ptsList, humanHeight=10):
         k2 = multivariate_normal(mean=m2, cov=s2)
 
         densityMap += (k1.pdf(xxyy) + k2.pdf(xxyy)).reshape((height, width))
-    densityMap = densityMap / densityMap.sum(axis=(0,1)) * len(ptsList)
-    densityMap = (densityMap - np.min(densityMap)) / (np.max(densityMap) - np.min(densityMap))
+    densityMap = densityMap / densityMap.sum(axis=(0, 1)) * len(ptsList)
+    densityMap = (densityMap - np.min(densityMap)) / (
+        np.max(densityMap) - np.min(densityMap))
     densityMap = np.array(densityMap * 255, dtype=np.uint8)
     densityMap = cv2.applyColorMap(densityMap, cv2.COLORMAP_JET)
     plt.imshow(densityMap)
+
 
 ptsList = [(5, 5), (10, 10)]
 genGaussianKernel(100, 100, ptsList)

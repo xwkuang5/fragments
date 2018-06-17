@@ -3,8 +3,8 @@ import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 
-class DecisionNode:
 
+class DecisionNode:
     def __init__(self, attr_idx, attr_thresh, flipped=False, error_rate=None):
         """Initialize a decision node
 
@@ -37,18 +37,25 @@ class DecisionNode:
             the representation string for the decision node
         """
 
-        sep_str = "-"*50
+        sep_str = "-" * 50
 
         if self._flipped:
-            decision_str = "\tf(x) = -1 if x[{}] <= {}, else +1".format(self._attr_idx, self._attr_thresh)
+            decision_str = "\tf(x) = -1 if x[{}] <= {}, else +1".format(
+                self._attr_idx, self._attr_thresh)
         else:
-            decision_str = "\tf(x) = +1 if x[{}] <= {}, else -1".format(self._attr_idx, self._attr_thresh)
-        
-        if self._error_rate is not None:
-            error_str = "\tError rate on training set: {:.4f}".format(self._error_rate)
-            return "\n".join([sep_str, "Classification Node", decision_str, error_str, sep_str])
+            decision_str = "\tf(x) = +1 if x[{}] <= {}, else -1".format(
+                self._attr_idx, self._attr_thresh)
 
-        return "\n".join([sep_str, "Classification Node", decision_str, sep_str])
+        if self._error_rate is not None:
+            error_str = "\tError rate on training set: {:.4f}".format(
+                self._error_rate)
+            return "\n".join([
+                sep_str, "Classification Node", decision_str, error_str,
+                sep_str
+            ])
+
+        return "\n".join(
+            [sep_str, "Classification Node", decision_str, sep_str])
 
     def classification(self, instance):
         """Make classification on the instance
@@ -59,12 +66,15 @@ class DecisionNode:
             numpy instance to be classified
         """
 
-        assert self._attr_idx < len(instance), "Attribute index can not be greater than length of instances"
+        assert self._attr_idx < len(
+            instance
+        ), "Attribute index can not be greater than length of instances"
 
         if self._flipped:
             return -1 if instance[self._attr_idx] <= self._attr_thresh else 1
         else:
             return 1 if instance[self._attr_idx] <= self._attr_thresh else -1
+
 
 class AdaBoost:
     """Binary AdaBoost classifier with decision stump base learner
@@ -103,9 +113,11 @@ class AdaBoost:
         weak_hypothesis : DecisionNode,
             A newly constructed weak hypothesis 
         """
-        
+
         # train_X[:, i][sorted_features_idx[i]][j] gives the j-th smallest value of feature i
-        sorted_features_idx = [np.argsort(train_X[:, idx]) for idx in range(train_X.shape[1])]
+        sorted_features_idx = [
+            np.argsort(train_X[:, idx]) for idx in range(train_X.shape[1])
+        ]
 
         positives = train_Y == 1
 
@@ -125,29 +137,32 @@ class AdaBoost:
             dp[0] = distribution[positives].sum()
 
             errors.append((i, 0, dp[0], False))
-            errors.append((i, 0, 1-dp[0], True))
+            errors.append((i, 0, 1 - dp[0], True))
 
             # loop over all possible thresholds
             for j in range(1, num_examples + 1):
 
-                orig_idx = examples_idx_sorted_by_feature_i[j-1]
+                orig_idx = examples_idx_sorted_by_feature_i[j - 1]
 
                 if train_Y[orig_idx] == 1:
-                    dp[j] = dp[j-1] - distribution[orig_idx]
+                    dp[j] = dp[j - 1] - distribution[orig_idx]
                 else:
-                    dp[j] = dp[j-1] + distribution[orig_idx]
-                
+                    dp[j] = dp[j - 1] + distribution[orig_idx]
+
                 # append normal error
                 errors.append((i, j, dp[j], False))
                 # append flipped error
-                errors.append((i, j, 1-dp[j], True))
+                errors.append((i, j, 1 - dp[j], True))
 
-        fea_idx, sorted_example_idx, error_rate, flipped = min(errors, key=lambda x: x[2])
+        fea_idx, sorted_example_idx, error_rate, flipped = min(
+            errors, key=lambda x: x[2])
 
         if sorted_example_idx == 0:
-            fea_thresh = train_X[:, fea_idx][sorted_features_idx[fea_idx]][sorted_example_idx] - 0.5
+            fea_thresh = train_X[:,
+                                 fea_idx][sorted_features_idx[fea_idx]][sorted_example_idx] - 0.5
         else:
-            fea_thresh = train_X[:, fea_idx][sorted_features_idx[fea_idx]][sorted_example_idx-1]
+            fea_thresh = train_X[:, fea_idx][sorted_features_idx[fea_idx]][
+                sorted_example_idx - 1]
 
         return DecisionNode(fea_idx, fea_thresh, flipped, error_rate)
 
@@ -180,33 +195,44 @@ class AdaBoost:
         train_history = []
         test_history = []
 
-        for iteration in range(1, self._num_learners+1):
-            
+        for iteration in range(1, self._num_learners + 1):
+
             if iteration == 1:
                 weights = np.ones(train_Y.shape)
             else:
-                weights = np.exp(np.multiply(-1*train_Y, np.dot(self.prediction_vector(train_X), self._base_learners_weights)))
+                weights = np.exp(
+                    np.multiply(-1 * train_Y,
+                                np.dot(
+                                    self.prediction_vector(train_X),
+                                    self._base_learners_weights)))
 
             # readjust training distributions
             distribution = weights / weights.sum()
 
             # construct new hypothesis
-            weak_hypothesis = self.construct_weak_hypothesis(train_X, train_Y, distribution)
+            weak_hypothesis = self.construct_weak_hypothesis(
+                train_X, train_Y, distribution)
 
-            correct_prediction_idx = [idx for idx in range(train_X.shape[0]) if train_Y[idx] == weak_hypothesis.classification(train_X[idx])]
+            correct_prediction_idx = [
+                idx for idx in range(train_X.shape[0])
+                if train_Y[idx] == weak_hypothesis.classification(
+                    train_X[idx])
+            ]
 
             wt_plus = weights[correct_prediction_idx].sum()
             wt_minus = weights.sum() - wt_plus
-            
+
             # add weights and base learners
             self._base_learners.append(weak_hypothesis)
-            self._base_learners_weights.append(.5*np.log(wt_plus/wt_minus))
+            self._base_learners_weights.append(.5 * np.log(wt_plus / wt_minus))
 
-            train_history.append((iteration, self.error_rate(train_X, train_Y)))
+            train_history.append((iteration, self.error_rate(train_X,
+                                                             train_Y)))
 
             if test_X is not None and test_Y is not None:
-                test_history.append((iteration, self.error_rate(test_X, test_Y)))
-            
+                test_history.append((iteration, self.error_rate(
+                    test_X, test_Y)))
+
         return train_history, test_history
 
     def predict(self, instances):
@@ -224,7 +250,9 @@ class AdaBoost:
         """
 
         def func(instance):
-            if np.dot(self.prediction_vector(instance), self._base_learners_weights) >= 0:
+            if np.dot(
+                    self.prediction_vector(instance),
+                    self._base_learners_weights) >= 0:
                 return 1
             else:
                 return -1
@@ -249,7 +277,9 @@ class AdaBoost:
         """
 
         if len(instances.shape) == 1:
-            return np.array([node.classification(instances) for node in self._base_learners])
+            return np.array([
+                node.classification(instances) for node in self._base_learners
+            ])
         else:
             return np.apply_along_axis(lambda x: np.array([node.classification(x) for node in self._base_learners]), 1, instances)
 
@@ -272,6 +302,7 @@ class AdaBoost:
         predictions = self.predict(X)
 
         return 1.0 - np.mean(predictions == y)
+
 
 from sklearn import datasets
 

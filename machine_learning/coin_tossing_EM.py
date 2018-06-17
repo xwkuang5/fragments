@@ -106,7 +106,7 @@ class CoinTossEMEstimator:
             samples obtained from the coin tossing experiment
         """
 
-        # compute the conditional probability of the latent variables 
+        # compute the conditional probability of the latent variables
         # given the samples and the current theta
         self._Qi_zk = np.stack([
             self.p_zk_cond_xi(samples[idx], self._thetas_hat,

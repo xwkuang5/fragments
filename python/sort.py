@@ -109,8 +109,26 @@ def heap_sort(arr, low, high):
     arr[low:high + 1] = [x for x in reversed(copy)]
 
 
+def radix_sort(arr, low, high, digit, base=10):
+    def sort_digit(arr, low, high, pos, base):
+        buckets = [[] for _ in range(base)]
+
+        for val in arr[low:high + 1]:
+
+            digit = (val // base**pos) % base
+
+            buckets[digit].append(val)
+
+        return [item for digit_list in buckets for item in digit_list]
+
+    for i in range(digit):
+
+        arr[low:high + 1] = sort_digit(arr, low, high, i, base)
+
+
 arr = [2, 1, 2, 4, 7, 5, 2, 6, 10, 8]
 size = len(arr)
 # qsort(arr, 0, size-1)
-heap_sort(arr, 0, size - 1)
+# heap_sort(arr, 0, size - 1)
+radix_sort(arr, 0, size - 1, 1, 10)
 print(arr)

@@ -11,7 +11,6 @@ void max_heapify(int *array, int size, int index);
 void build_heap(int *array, int size);
 void heap_sort(int *array, int size);
 
-
 int hoare_partition(int *array, int low, int high);
 int partition(int *array, int low, int high);
 void qsort(int *array, int low, int high);

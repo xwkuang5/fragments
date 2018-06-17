@@ -37,7 +37,6 @@ Installed packages:
     wheel            0.31.0 
 """
 
-
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -46,18 +45,23 @@ from sklearn.datasets import make_classification
 
 from imblearn.over_sampling import RandomOverSampler
 
-X, y = make_classification(n_samples=5000, n_features=2, n_informative=2,
-                                n_redundant=0, n_repeated=0, n_classes=2,
-                                n_clusters_per_class=2,
-                                weights=[0.95, 0.05],
-                                flip_y=0,
-                                class_sep=0.1, random_state=0)
+X, y = make_classification(
+    n_samples=5000,
+    n_features=2,
+    n_informative=2,
+    n_redundant=0,
+    n_repeated=0,
+    n_classes=2,
+    n_clusters_per_class=2,
+    weights=[0.95, 0.05],
+    flip_y=0,
+    class_sep=0.1,
+    random_state=0)
 
 # over-sample the minority class
 ros = RandomOverSampler({1: 3000}, random_state=0)
 
 X_resampled, y_resampled = ros.fit_sample(X, y)
-
 
 # create mesh grid
 x_min = min(min(X[:, 0]), min(X_resampled[:, 0]))
@@ -66,11 +70,10 @@ x_max = max(max(X[:, 0]), max(X_resampled[:, 0]))
 y_min = min(min(X[:, 1]), min(X_resampled[:, 1]))
 y_max = max(max(X[:, 1]), max(X_resampled[:, 1]))
 
-xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.1), np.arange(y_min, y_max, 0.1))
-
+xx, yy = np.meshgrid(
+    np.arange(x_min, x_max, 0.1), np.arange(y_min, y_max, 0.1))
 
 f, axarr = plt.subplots(2, 1, sharex='col', figsize=(10, 8))
-
 """
 Raw data
 """
@@ -81,11 +84,8 @@ Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
 Z = Z.reshape(xx.shape)
 
 axarr[0].contourf(xx, yy, Z, alpha=0.4)
-axarr[0].scatter(X[:, 0], X[:, 1], c=y,
-            s=20, edgecolor='k')
+axarr[0].scatter(X[:, 0], X[:, 1], c=y, s=20, edgecolor='k')
 axarr[0].set_title("Original data")
-
-
 """
 Minority-class-over-sampled data
 """
@@ -96,8 +96,8 @@ Z = clf_resampled.predict(np.c_[xx.ravel(), yy.ravel()])
 Z = Z.reshape(xx.shape)
 
 axarr[1].contourf(xx, yy, Z, alpha=0.4)
-axarr[1].scatter(X_resampled[:, 0], X_resampled[:, 1], c=y_resampled,
-            s=20, edgecolor='k')
+axarr[1].scatter(
+    X_resampled[:, 0], X_resampled[:, 1], c=y_resampled, s=20, edgecolor='k')
 axarr[1].set_title("Over-sampled data")
 
 plt.show()

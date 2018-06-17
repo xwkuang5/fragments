@@ -9,6 +9,7 @@ Created on Mon Aug 21 16:40:07 2017
 from sklearn.datasets.samples_generator import make_blobs
 from sklearn.model_selection import train_test_split
 
+
 def load_2Dblobs(n_samples, n_center, ratio=0.5, one_hot=True):
     """
     Arguments:
@@ -23,7 +24,9 @@ def load_2Dblobs(n_samples, n_center, ratio=0.5, one_hot=True):
     Y_test  -- testing labels of the data in shape [n_test_samples, n_center]
     """
 
-    X, y = make_blobs(n_samples=n_samples, centers=n_center, n_features=2, random_state=0)
-    X_train, X_test, Y_train, Y_test = train_test_split(X, y, test_size=ratio, random_state=0)
+    X, y = make_blobs(
+        n_samples=n_samples, centers=n_center, n_features=2, random_state=0)
+    X_train, X_test, Y_train, Y_test = train_test_split(
+        X, y, test_size=ratio, random_state=0)
 
     return X_train, Y_train, X_test, Y_test

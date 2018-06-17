@@ -10,11 +10,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats
 
+
 def genData(numPts, numOutliers, mu=0, sigma=1):
     data = np.random.normal(mu, sigma, numPts)
-    data = np.append(data, np.random.uniform(mu, mu+3*sigma, numOutliers))
+    data = np.append(data, np.random.uniform(mu, mu + 3 * sigma, numOutliers))
     return data
-    
+
+
 distributions = ['norm', 't']
 numPts = 1000
 numOutliers = 300

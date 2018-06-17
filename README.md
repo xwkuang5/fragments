@@ -1,4 +1,4 @@
-# code-fragments
+#code - fragments
 
 This repository contains codes that I wrote when learning new algorithms/techniques.
 

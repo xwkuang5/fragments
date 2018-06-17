@@ -1,11 +1,11 @@
 #ifndef ALGORITHMS_H
 #define ALGORITHMS_H
 
-#include <stdio.h>
 #include <limits.h>
-#include <time.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
