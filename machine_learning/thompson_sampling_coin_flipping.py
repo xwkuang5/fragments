@@ -423,7 +423,7 @@ greedy_player = EpsilonGreedyPlayer(num_arms, epsilon=.1)
 list_of_players = [optimal_player, greedy_player, ucb_player, thompson_sampler]
 
 # plot player performance vs number of rounds played
-num_rounds = [10**i for i in range(1, 3)]
+num_rounds = [10**i for i in range(1, 6)]
 
 plt.rcParams["figure.figsize"] = (10, len(num_rounds) * 2)
 
