@@ -191,7 +191,7 @@ int AVLTree ::get_height(node_ptr z) {
   }
 }
 
-void AVLTree ::insert_key(int key) {
+AVLTree ::node_ptr AVLTree ::insert_key(int key) {
   node_ptr new_node = bst_insert(key);
 
   node_ptr parent = new_node->parent_;
@@ -205,6 +205,8 @@ void AVLTree ::insert_key(int key) {
       parent = parent->parent_;
     }
   }
+
+  return new_node;
 }
 
 void AVLTree ::inorder_traversal(node_ptr z) {
@@ -233,18 +235,18 @@ void AVLTree ::postorder_traversal(node_ptr z) {
 
 void AVLTree ::print_tree(node_ptr z) { ; }
 
-int main() {
-  AVLTree *tree = new AVLTree(10);
-  tree->insert_key(6);
-  tree->insert_key(20);
-  tree->insert_key(15);
-  tree->insert_key(18);
-  tree->insert_key(4);
-  tree->insert_key(0);
-  tree->insert_key(1);
-  tree->insert_key(2);
-  tree->insert_key(3);
-  tree->inorder_traversal(tree->get_root());
+//int main() {
+  //AVLTree *tree = new AVLTree(10);
+  //tree->insert_key(6);
+  //tree->insert_key(20);
+  //tree->insert_key(15);
+  //tree->insert_key(18);
+  //tree->insert_key(4);
+  //tree->insert_key(0);
+  //tree->insert_key(1);
+  //tree->insert_key(2);
+  //tree->insert_key(3);
+  //tree->inorder_traversal(tree->get_root());
 
-  return 0;
-}
+  //return 0;
+//}

@@ -38,7 +38,7 @@ public:
 public:
   AVLTree();
   AVLTree(int key);
-  void insert_key(int key);
+  node_ptr insert_key(int key);
   void delete_key(int key);
   bool search_key(int key);
   bool is_empty();
