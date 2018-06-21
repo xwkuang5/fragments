@@ -249,7 +249,6 @@ BOOST_AUTO_TEST_CASE(TestAVLReverseIterator) {
   tmp = tree->insert_key(0);
   tree->insert_key(1);
   tree->insert_key(2);
-
   AVLTree::ReverseIterator iter = tree->rbegin();
   BOOST_CHECK_EQUAL(iter->key_, 20);
   iter++;
@@ -270,6 +269,78 @@ BOOST_AUTO_TEST_CASE(TestAVLReverseIterator) {
   BOOST_CHECK_EQUAL(iter->key_, 0);
   iter++;
   BOOST_CHECK_EQUAL(iter == tree->rend(), true);
+}
+
+BOOST_AUTO_TEST_CASE(TestAVLNumberNodesInSubtree) {
+  AVLTree *tree = new AVLTree(10);
+  AVLTree ::node_ptr tmp;
+  tmp = tree->insert_key(6);
+  tmp = tree->insert_key(20);
+  tmp = tree->insert_key(15);
+  tmp = tree->insert_key(18);
+  tmp = tree->insert_key(4);
+  tmp = tree->insert_key(0);
+  tree->insert_key(1);
+  tree->insert_key(2);
+
+  BOOST_CHECK_EQUAL(tree->root_->num_left_, 5);
+  BOOST_CHECK_EQUAL(tree->root_->num_right_, 3);
+  BOOST_CHECK_EQUAL(tree->root_->left_->num_left_, 3);
+  BOOST_CHECK_EQUAL(tree->root_->left_->num_right_, 1);
+  BOOST_CHECK_EQUAL(tree->root_->right_->num_left_, 1);
+  BOOST_CHECK_EQUAL(tree->root_->right_->num_right_, 1);
+  BOOST_CHECK_EQUAL(tmp->parent_->num_left_, 1);
+  BOOST_CHECK_EQUAL(tmp->parent_->num_right_, 1);
+  BOOST_CHECK_EQUAL(tmp->num_left_, 0);
+  BOOST_CHECK_EQUAL(tmp->num_right_, 0);
+}
+
+BOOST_AUTO_TEST_CASE(TestAVLGetIthNode) {
+  AVLTree *tree = new AVLTree(10);
+  AVLTree ::node_ptr tmp;
+  tmp = tree->insert_key(6);
+  tmp = tree->insert_key(20);
+  tmp = tree->insert_key(15);
+  tmp = tree->insert_key(18);
+  tmp = tree->insert_key(4);
+  tmp = tree->insert_key(0);
+  tree->insert_key(1);
+  tree->insert_key(2);
+
+  AVLTree::node_ptr root = tree->get_root();
+
+  BOOST_CHECK_EQUAL(tree->get_ith_node(root, 1)->key_, 0);
+  BOOST_CHECK_EQUAL(tree->get_ith_node(root, 2)->key_, 1);
+  BOOST_CHECK_EQUAL(tree->get_ith_node(root, 3)->key_, 2);
+  BOOST_CHECK_EQUAL(tree->get_ith_node(root, 4)->key_, 4);
+  BOOST_CHECK_EQUAL(tree->get_ith_node(root, 5)->key_, 6);
+  BOOST_CHECK_EQUAL(tree->get_ith_node(root, 6)->key_, 10);
+  BOOST_CHECK_EQUAL(tree->get_ith_node(root, 7)->key_, 15);
+  BOOST_CHECK_EQUAL(tree->get_ith_node(root, 8)->key_, 18);
+  BOOST_CHECK_EQUAL(tree->get_ith_node(root, 9)->key_, 20);
+}
+
+BOOST_AUTO_TEST_CASE(TestAVLGetIthSuccessor) {
+  AVLTree *tree = new AVLTree(10);
+  AVLTree ::node_ptr tmp;
+  tmp = tree->insert_key(6);
+  tmp = tree->insert_key(20);
+  tmp = tree->insert_key(15);
+  tmp = tree->insert_key(18);
+  tmp = tree->insert_key(4);
+  tmp = tree->insert_key(0);
+  tree->insert_key(1);
+  tree->insert_key(2);
+
+  BOOST_CHECK_EQUAL(tree->get_ith_successor(tmp, 0)->key_, 0);
+  BOOST_CHECK_EQUAL(tree->get_ith_successor(tmp, 1)->key_, 1);
+  BOOST_CHECK_EQUAL(tree->get_ith_successor(tmp, 2)->key_, 2);
+  BOOST_CHECK_EQUAL(tree->get_ith_successor(tmp, 3)->key_, 4);
+  BOOST_CHECK_EQUAL(tree->get_ith_successor(tmp, 4)->key_, 6);
+  BOOST_CHECK_EQUAL(tree->get_ith_successor(tmp, 5)->key_, 10);
+  BOOST_CHECK_EQUAL(tree->get_ith_successor(tmp, 6)->key_, 15);
+  BOOST_CHECK_EQUAL(tree->get_ith_successor(tmp, 7)->key_, 18);
+  BOOST_CHECK_EQUAL(tree->get_ith_successor(tmp, 8)->key_, 20);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -1,13 +1,14 @@
 #include "AVLTree.hpp"
 
 AVLTreeNode ::AVLTreeNode(int key)
-    : key_(key), height_(0), is_left_(false), is_right_(false), parent_(NULL),
-      left_(NULL), right_(NULL) {}
-AVLTreeNode ::AVLTreeNode(int key, int height, bool is_left, bool is_right,
-                          AVLTreeNode *parent, AVLTreeNode *left,
-                          AVLTreeNode *right)
-    : key_(key), height_(height), is_left_(is_left), is_right_(is_right),
-      parent_(parent), left_(left), right_(right) {}
+    : key_(key), height_(0), num_left_(0), num_right_(0), is_left_(false),
+      is_right_(false), parent_(NULL), left_(NULL), right_(NULL) {}
+AVLTreeNode ::AVLTreeNode(int key, int height, int num_left, int num_right,
+                          bool is_left, bool is_right, AVLTreeNode *parent,
+                          AVLTreeNode *left, AVLTreeNode *right)
+    : key_(key), height_(height), num_left_(num_left), num_right_(num_right),
+      is_left_(is_left), is_right_(is_right), parent_(parent), left_(left),
+      right_(right) {}
 
 void AVLTreeNode ::print_node() {
   std::string parent = parent_ == NULL ? "NULL" : std::to_string(parent_->key_);
@@ -24,11 +25,12 @@ void AVLTreeNode ::print_node() {
     }
   }
 
-  std::string left = left_ == NULL ? "NULL" : std::to_string(left_->key_);
-  std::string right = right_ == NULL ? "NULL" : std::to_string(right_->key_);
-  std ::cout << "key: " << key_ << ", height: " << height_
-             << ", left child: " << left << ", right child: " << right << ", "
-             << heredity_str << std::endl;
+  std::string left = "left subtree has " + std::to_string(num_left_) + " nodes";
+  std::string right =
+      "right subtree has " + std::to_string(num_right_) + " nodes";
+
+  std ::cout << "key: " << key_ << ", height: " << height_ << ", " << left
+             << ", " << right << ", " << heredity_str << std::endl;
 }
 
 AVLTree ::AVLTree() : root_(NULL) {}
@@ -65,6 +67,8 @@ void AVLTree ::rotate_right(node_ptr z) {
   z->is_left_ = false;
   z->is_right_ = true;
 
+  set_number_from_children(z);
+  set_number_from_children(y);
   set_height_from_children(z);
   set_height_from_children(y);
 }
@@ -96,6 +100,8 @@ void AVLTree ::rotate_left(node_ptr z) {
   z->is_left_ = true;
   z->is_right_ = false;
 
+  set_number_from_children(z);
+  set_number_from_children(y);
   set_height_from_children(z);
   set_height_from_children(y);
 }
@@ -114,6 +120,19 @@ void AVLTree ::set_height_from_children(node_ptr z) {
   }
 
   z->height_ = max_height + 1;
+}
+
+void AVLTree ::set_number_from_children(node_ptr z) {
+  if (z == NULL) {
+    return;
+  } else {
+    z->num_left_ =
+        z->left_ == NULL ? 0 : 1 + z->left_->num_left_ + z->left_->num_right_;
+
+    z->num_right_ = z->right_ == NULL
+                        ? 0
+                        : 1 + z->right_->num_left_ + z->right_->num_right_;
+  }
 }
 
 void AVLTree ::fix_node(node_ptr z) {
@@ -147,14 +166,15 @@ void AVLTree ::fix_node(node_ptr z) {
       rotate_left(z);
     }
   }
-  if (root_ == z)
+  if (root_ == z) {
     root_ = z->parent_;
+  }
 }
 
 AVLTree ::node_ptr AVLTree ::bst_insert(int key) {
 
   if (root_ == NULL) {
-    root_ = new node_type(key, 0, false, false, NULL, NULL, NULL);
+    root_ = new node_type(key);
     return root_;
   }
 
@@ -172,10 +192,10 @@ AVLTree ::node_ptr AVLTree ::bst_insert(int key) {
   }
 
   if (prev->key_ < key) {
-    prev->right_ = new node_type(key, 0, false, true, prev, NULL, NULL);
+    prev->right_ = new node_type(key, 0, 0, 0, false, true, prev, NULL, NULL);
     return prev->right_;
   } else {
-    prev->left_ = new node_type(key, 0, true, false, prev, NULL, NULL);
+    prev->left_ = new node_type(key, 0, 0, 0, true, false, prev, NULL, NULL);
     return prev->left_;
   }
 }
@@ -417,6 +437,40 @@ AVLTree ::node_ptr AVLTree ::get_successor(AVLTree ::node_ptr z) {
   }
 }
 
+AVLTree::node_ptr AVLTree::get_ith_node(AVLTree::node_ptr z, int i) {
+  // assume i is 1-based
+  if (i == z->num_left_ + 1) {
+    return z;
+  } else if (i <= 0) {
+    return NULL;
+  } else {
+    if (i <= z->num_left_) {
+      return get_ith_node(z->left_, i);
+    } else {
+      return get_ith_node(z->right_, i - z->num_left_ - 1);
+    }
+  }
+}
+
+AVLTree::node_ptr AVLTree::get_ith_successor(AVLTree::node_ptr z, int i) {
+  if (i == 0) {
+    return z;
+  } else {
+    if (i <= z->num_right_) {
+      return get_ith_node(z->right_, i);
+    } else {
+      if (z->is_left_) {
+        return get_ith_successor(z->parent_, i - z->num_right_ - 1);
+      } else if (z->is_right_) {
+        return get_ith_successor(z->parent_, i + z->num_left_ + 1);
+      } else {
+        // z is the node and i > z->num_right
+        return NULL;
+      }
+    }
+  }
+}
+
 int AVLTree ::get_height(node_ptr z) {
   if (z == NULL) {
     return -1;
@@ -431,10 +485,12 @@ AVLTree ::node_ptr AVLTree ::insert_key(int key) {
   node_ptr parent = new_node->parent_;
 
   while (parent != NULL) {
+    set_number_from_children(parent);
     set_height_from_children(parent);
     if (std::abs(get_height(parent->left_) - get_height(parent->right_)) >= 2) {
       fix_node(parent);
-      break;
+      // break;
+      // go all the way up to the root to correct the number of children
     } else {
       parent = parent->parent_;
     }
@@ -447,6 +503,7 @@ void AVLTree ::delete_key(int key) {
   node_ptr z = bst_delete(key);
 
   while (z != NULL) {
+    set_number_from_children(z);
     set_height_from_children(z);
 
     if (std::abs(get_height(z->left_) - get_height(z->right_)) >= 2) {

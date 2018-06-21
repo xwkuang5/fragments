@@ -9,6 +9,8 @@ class AVLTreeNode {
 public:
   int key_;
   int height_;
+  int num_left_;
+  int num_right_;
   bool is_left_;
   bool is_right_;
   AVLTreeNode *parent_;
@@ -16,8 +18,9 @@ public:
   AVLTreeNode *right_;
 
   AVLTreeNode(int key);
-  AVLTreeNode(int key, int height, bool is_left, bool is_right,
-              AVLTreeNode *parent, AVLTreeNode *left, AVLTreeNode *right);
+  AVLTreeNode(int key, int height, int num_left, int num_right, bool is_left,
+              bool is_right, AVLTreeNode *parent, AVLTreeNode *left,
+              AVLTreeNode *right);
 
   void print_node();
 };
@@ -34,6 +37,7 @@ public:
   void fix_node(node_ptr z);
   void rotate_right(node_ptr z);
   void rotate_left(node_ptr z);
+  void set_number_from_children(node_ptr z);
   void set_height_from_children(node_ptr z);
   node_ptr bst_insert(int key);
   node_ptr bst_delete(int key);
@@ -50,6 +54,8 @@ public:
   node_ptr get_right_most();
   node_ptr get_successor(node_ptr z);
   node_ptr get_predecessor(node_ptr z);
+  node_ptr get_ith_node(node_ptr z, int i);
+  node_ptr get_ith_successor(node_ptr z, int i);
 
   void inorder_traversal(node_ptr z);
   void preorder_traversal(node_ptr z);
