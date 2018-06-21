@@ -43,7 +43,7 @@ public:
       return current;
     }
 
-    // postfix
+    // prefix
     self_type &operator++(int dummy) {
       this->_ptr = this->_ptr->next_;
       return *this;

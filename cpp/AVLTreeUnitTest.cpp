@@ -204,4 +204,72 @@ BOOST_AUTO_TEST_CASE(TestAVLSearchKey) {
   BOOST_CHECK_EQUAL(tree->search_key(20), true);
 }
 
+BOOST_AUTO_TEST_CASE(TestAVLForwardIterator) {
+  AVLTree *tree = new AVLTree(10);
+  AVLTree ::node_ptr tmp;
+  tmp = tree->insert_key(6);
+  tmp = tree->insert_key(20);
+  tmp = tree->insert_key(15);
+  tmp = tree->insert_key(18);
+  tmp = tree->insert_key(4);
+  tmp = tree->insert_key(0);
+  tree->insert_key(1);
+  tree->insert_key(2);
+
+  AVLTree::ForwardIterator iter = tree->begin();
+  BOOST_CHECK_EQUAL(iter->key_, 0);
+  iter++;
+  BOOST_CHECK_EQUAL(iter->key_, 1);
+  iter++;
+  BOOST_CHECK_EQUAL(iter->key_, 2);
+  iter++;
+  BOOST_CHECK_EQUAL(iter->key_, 4);
+  iter++;
+  BOOST_CHECK_EQUAL(iter->key_, 6);
+  iter++;
+  BOOST_CHECK_EQUAL(iter->key_, 10);
+  iter++;
+  BOOST_CHECK_EQUAL(iter->key_, 15);
+  iter++;
+  BOOST_CHECK_EQUAL(iter->key_, 18);
+  iter++;
+  BOOST_CHECK_EQUAL(iter->key_, 20);
+  iter++;
+  BOOST_CHECK_EQUAL(iter == tree->end(), true);
+}
+
+BOOST_AUTO_TEST_CASE(TestAVLReverseIterator) {
+  AVLTree *tree = new AVLTree(10);
+  AVLTree ::node_ptr tmp;
+  tmp = tree->insert_key(6);
+  tmp = tree->insert_key(20);
+  tmp = tree->insert_key(15);
+  tmp = tree->insert_key(18);
+  tmp = tree->insert_key(4);
+  tmp = tree->insert_key(0);
+  tree->insert_key(1);
+  tree->insert_key(2);
+
+  AVLTree::ReverseIterator iter = tree->rbegin();
+  BOOST_CHECK_EQUAL(iter->key_, 20);
+  iter++;
+  BOOST_CHECK_EQUAL(iter->key_, 18);
+  iter++;
+  BOOST_CHECK_EQUAL(iter->key_, 15);
+  iter++;
+  BOOST_CHECK_EQUAL(iter->key_, 10);
+  iter++;
+  BOOST_CHECK_EQUAL(iter->key_, 6);
+  iter++;
+  BOOST_CHECK_EQUAL(iter->key_, 4);
+  iter++;
+  BOOST_CHECK_EQUAL(iter->key_, 2);
+  iter++;
+  BOOST_CHECK_EQUAL(iter->key_, 1);
+  iter++;
+  BOOST_CHECK_EQUAL(iter->key_, 0);
+  iter++;
+  BOOST_CHECK_EQUAL(iter == tree->rend(), true);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

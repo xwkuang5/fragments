@@ -339,6 +339,26 @@ AVLTree::node_ptr AVLTree ::bst_delete(int key) {
 
 AVLTree ::node_ptr AVLTree ::get_root() { return root_; }
 
+AVLTree ::node_ptr AVLTree ::get_left_most() {
+  node_ptr tmp = root_;
+
+  while (tmp->left_ != NULL) {
+    tmp = tmp->left_;
+  }
+
+  return tmp;
+}
+
+AVLTree ::node_ptr AVLTree ::get_right_most() {
+  node_ptr tmp = root_;
+
+  while (tmp->right_ != NULL) {
+    tmp = tmp->right_;
+  }
+
+  return tmp;
+}
+
 AVLTree ::node_ptr AVLTree ::get_predecessor(AVLTree ::node_ptr z) {
   if (z == NULL) {
     return NULL;
@@ -473,4 +493,116 @@ void AVLTree ::postorder_traversal(node_ptr z) {
     postorder_traversal(z->right_);
     std::cout << z->key_ << " ";
   }
+}
+
+AVLTree::ForwardIterator AVLTree::begin() {
+  return ForwardIterator(this, get_left_most());
+}
+
+AVLTree::ForwardIterator AVLTree::end() { return ForwardIterator(this, NULL); }
+
+AVLTree::ForwardIterator::ForwardIterator()
+    : _tree_ptr(NULL), _node_ptr(NULL) {}
+
+AVLTree::ForwardIterator::ForwardIterator(AVLTree::tree_ptr tptr,
+                                          AVLTree::node_ptr nptr)
+    : _tree_ptr(tptr), _node_ptr(nptr) {}
+
+AVLTree::ForwardIterator::ForwardIterator(
+    const AVLTree::ForwardIterator::self_type &rhs)
+    : _tree_ptr(rhs._tree_ptr), _node_ptr(rhs._node_ptr) {}
+
+AVLTree::ForwardIterator::~ForwardIterator() {
+  _tree_ptr = NULL;
+  _node_ptr = NULL;
+}
+
+AVLTree::ForwardIterator::self_type AVLTree::ForwardIterator::operator++() {
+  self_type current = self_type(*this);
+  _node_ptr = _tree_ptr->get_successor(_node_ptr);
+
+  return current;
+}
+
+AVLTree::ForwardIterator::self_type &AVLTree::ForwardIterator::
+operator++(int dummy) {
+  _node_ptr = _tree_ptr->get_successor(_node_ptr);
+
+  return *this;
+}
+
+AVLTree::node_ptr AVLTree::ForwardIterator::operator->() { return _node_ptr; }
+
+AVLTree::node_type AVLTree::ForwardIterator::operator*() { return *_node_ptr; }
+
+bool AVLTree::ForwardIterator::
+operator==(const AVLTree::ForwardIterator::self_type &rhs) {
+  return _tree_ptr == rhs._tree_ptr && _node_ptr == rhs._node_ptr;
+}
+
+bool AVLTree::ForwardIterator::
+operator!=(const AVLTree::ForwardIterator::self_type &rhs) {
+  return !(*this == rhs);
+}
+
+void AVLTree::ForwardIterator::
+operator=(const AVLTree::ForwardIterator::self_type &rhs) {
+  _tree_ptr = rhs._tree_ptr;
+  _node_ptr = rhs._node_ptr;
+}
+
+AVLTree::ReverseIterator AVLTree::rbegin() {
+  return ReverseIterator(this, get_right_most());
+}
+
+AVLTree::ReverseIterator AVLTree::rend() { return ReverseIterator(this, NULL); }
+
+AVLTree::ReverseIterator::ReverseIterator()
+    : _tree_ptr(NULL), _node_ptr(NULL) {}
+
+AVLTree::ReverseIterator::ReverseIterator(AVLTree::tree_ptr tptr,
+                                          AVLTree::node_ptr nptr)
+    : _tree_ptr(tptr), _node_ptr(nptr) {}
+
+AVLTree::ReverseIterator::ReverseIterator(
+    const AVLTree::ReverseIterator::self_type &rhs)
+    : _tree_ptr(rhs._tree_ptr), _node_ptr(rhs._node_ptr) {}
+
+AVLTree::ReverseIterator::~ReverseIterator() {
+  _tree_ptr = NULL;
+  _node_ptr = NULL;
+}
+
+AVLTree::ReverseIterator::self_type AVLTree::ReverseIterator::operator++() {
+  self_type current = self_type(*this);
+  _node_ptr = _tree_ptr->get_predecessor(_node_ptr);
+
+  return current;
+}
+
+AVLTree::ReverseIterator::self_type &AVLTree::ReverseIterator::
+operator++(int dummy) {
+  _node_ptr = _tree_ptr->get_predecessor(_node_ptr);
+
+  return *this;
+}
+
+AVLTree::node_ptr AVLTree::ReverseIterator::operator->() { return _node_ptr; }
+
+AVLTree::node_type AVLTree::ReverseIterator::operator*() { return *_node_ptr; }
+
+bool AVLTree::ReverseIterator::
+operator==(const AVLTree::ReverseIterator::self_type &rhs) {
+  return _tree_ptr == rhs._tree_ptr && _node_ptr == rhs._node_ptr;
+}
+
+bool AVLTree::ReverseIterator::
+operator!=(const AVLTree::ReverseIterator::self_type &rhs) {
+  return !(*this == rhs);
+}
+
+void AVLTree::ReverseIterator::
+operator=(const AVLTree::ReverseIterator::self_type &rhs) {
+  _tree_ptr = rhs._tree_ptr;
+  _node_ptr = rhs._node_ptr;
 }
