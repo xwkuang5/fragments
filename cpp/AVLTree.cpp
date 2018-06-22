@@ -452,6 +452,25 @@ AVLTree::node_ptr AVLTree::get_ith_node(AVLTree::node_ptr z, int i) {
   }
 }
 
+AVLTree::node_ptr AVLTree::get_ith_predecessor(AVLTree::node_ptr z, int i) {
+  if (i == 0) {
+    return z;
+  } else {
+    if (i <= z->num_left_) {
+      return get_ith_node(z->left_, z->num_left_ - i + 1);
+    } else {
+      if (z->is_left_) {
+        return get_ith_predecessor(z->parent_, i + z->num_right_ + 1);
+      } else if (z->is_right_) {
+        return get_ith_predecessor(z->parent_, i - z->num_left_ - 1);
+      } else {
+        // z is the root node and i > z->num_left
+        return NULL;
+      }
+    }
+  }
+}
+
 AVLTree::node_ptr AVLTree::get_ith_successor(AVLTree::node_ptr z, int i) {
   if (i == 0) {
     return z;
@@ -464,7 +483,7 @@ AVLTree::node_ptr AVLTree::get_ith_successor(AVLTree::node_ptr z, int i) {
       } else if (z->is_right_) {
         return get_ith_successor(z->parent_, i + z->num_left_ + 1);
       } else {
-        // z is the node and i > z->num_right
+        // z is the root node and i > z->num_right
         return NULL;
       }
     }

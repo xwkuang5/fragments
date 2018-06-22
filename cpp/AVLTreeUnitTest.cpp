@@ -343,4 +343,26 @@ BOOST_AUTO_TEST_CASE(TestAVLGetIthSuccessor) {
   BOOST_CHECK_EQUAL(tree->get_ith_successor(tmp, 8)->key_, 20);
 }
 
+BOOST_AUTO_TEST_CASE(TestAVLGetIthPredecessor) {
+  AVLTree *tree = new AVLTree(10);
+  AVLTree ::node_ptr tmp;
+  tmp = tree->insert_key(6);
+  tmp = tree->insert_key(20);
+  tree->insert_key(15);
+  tree->insert_key(18);
+  tree->insert_key(4);
+  tree->insert_key(0);
+  tree->insert_key(1);
+  tree->insert_key(2);
+
+  BOOST_CHECK_EQUAL(tree->get_ith_predecessor(tmp, 0)->key_, 20);
+  BOOST_CHECK_EQUAL(tree->get_ith_predecessor(tmp, 1)->key_, 18);
+  BOOST_CHECK_EQUAL(tree->get_ith_predecessor(tmp, 2)->key_, 15);
+  BOOST_CHECK_EQUAL(tree->get_ith_predecessor(tmp, 3)->key_, 10);
+  BOOST_CHECK_EQUAL(tree->get_ith_predecessor(tmp, 4)->key_, 6);
+  BOOST_CHECK_EQUAL(tree->get_ith_predecessor(tmp, 5)->key_, 4);
+  BOOST_CHECK_EQUAL(tree->get_ith_predecessor(tmp, 6)->key_, 2);
+  BOOST_CHECK_EQUAL(tree->get_ith_predecessor(tmp, 7)->key_, 1);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

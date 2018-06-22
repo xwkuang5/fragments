@@ -55,6 +55,7 @@ public:
   node_ptr get_successor(node_ptr z);
   node_ptr get_predecessor(node_ptr z);
   node_ptr get_ith_node(node_ptr z, int i);
+  node_ptr get_ith_predecessor(node_ptr z, int);
   node_ptr get_ith_successor(node_ptr z, int i);
 
   void inorder_traversal(node_ptr z);
