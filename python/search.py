@@ -1,4 +1,5 @@
 import time
+import unittest
 import functools
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,6 +15,7 @@ def interpolation_search(arr, low, high, key):
                 return high + 1
             else:
                 return low
+
         interp = low + int(
             (key - arr[low]) // (arr[high] - arr[low]) * (high - low))
 
@@ -45,8 +47,111 @@ def binary_search(arr, low, high, key):
 
     return low
 
+def binary_search_return_first(arr, low, high, key):
+
+    l = low
+    h = high
+
+    while l < h:
+
+        m = (l + h) // 2
+
+        if arr[m] < key:
+            l = m + 1
+        else:
+            h = m
+
+    # in the end, l = high and low <= l = h <= high must be true
+    if arr[l] >= key:
+        return l
+    else:
+        return l+1
+
+def binary_search_return_last(arr, low, high, key):
+
+    l = low
+    h = high
+
+    while l < h:
+
+        m = (l + h) // 2 + 1
+
+        if arr[m] <= key:
+            l = m
+        else:
+            h = m - 1
+    
+    # in the end, l = high and low <= l = h <= high must be true
+    if arr[l] >= key:
+        return l
+    else:
+        return l+1
+
+class TestBinarySearch(unittest.TestCase):
+
+    def test_unique_key_exists(self):
+
+        arr = [1, 2, 3, 4, 5, 6, 7, 8]
+
+        low = 0
+        high = len(arr) - 1
+
+        for val in arr:
+
+            ret1 = binary_search(arr, low, high, val)
+            ret2 = binary_search_return_first(arr, low, high, val)
+            ret3 = binary_search_return_last(arr, low, high, val)
+
+            self.assertEqual(arr[ret1], val)
+            self.assertEqual(ret1, ret2)
+            self.assertEqual(ret2, ret3)
+    
+    def test_duplicate_key_exists(self):
+
+        arr = [1, 2, 3, 3, 4, 5, 5, 5, 5, 5, 6, 7, 7, 7]
+
+        low = 0
+        high = len(arr) - 1
+
+        for val in arr:
+
+            ret1 = binary_search(arr, low, high, val)
+            ret2 = binary_search_return_first(arr, low, high, val)
+            ret3 = binary_search_return_last(arr, low, high, val)
+
+            self.assertEqual(ret2 <= ret1 <= ret3, True)
+            self.assertEqual(arr[ret1], val)
+            self.assertEqual(arr[ret2], val)
+            self.assertEqual(arr[ret3], val)
+
+    def test_unique_key_not_exists(self):
+
+        arr = [1, 2, 3, 4, 5, 6, 7]
+
+        low = 0
+        high = len(arr) - 1
+
+        for idx, val in enumerate(arr):
+
+            ret1 = binary_search(arr, low, high, val-0.5)
+            ret2 = binary_search_return_first(arr, low, high, val-0.5)
+            ret3 = binary_search_return_last(arr, low, high, val-0.5)
+
+            self.assertEqual(idx, ret1)
+            self.assertEqual(ret1, ret2)
+            self.assertEqual(ret1, ret3)
+
+            ret1 = binary_search(arr, low, high, val+0.5)
+            ret2 = binary_search_return_first(arr, low, high, val+0.5)
+            ret3 = binary_search_return_last(arr, low, high, val+0.5)
+
+            self.assertEqual(idx+1, ret1)
+            self.assertEqual(ret1, ret2)
+            self.assertEqual(ret1, ret3)
 
 if __name__ == "__main__":
+
+    unittest.main()
 
     exponent = 6
     repition = 30
