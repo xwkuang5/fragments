@@ -1,6 +1,27 @@
-#include "disjoint_set.hpp"
+#ifndef DisjointSet_H
+#define DisjointSet_H
 
-data_structure::disjoint_set::disjoint_set(int size) {
+#include <iostream>
+
+class DisjointSet {
+private:
+  int size;
+  int *parent;
+  int *rank;
+
+public:
+  DisjointSet(int size);
+
+  void make_set(int i);
+
+  int find(int i);
+
+  void union_by_rank(int i, int j);
+
+  ~DisjointSet();
+};
+
+DisjointSet::DisjointSet(int size) {
   this->size = size;
 
   this->parent = new int[this->size];
@@ -9,12 +30,12 @@ data_structure::disjoint_set::disjoint_set(int size) {
   std::fill(&this->parent[0], &this->parent[0] + this->size, -1);
 }
 
-void data_structure::disjoint_set::make_set(int i) {
+void DisjointSet::make_set(int i) {
   this->parent[i] = i;
   this->rank[i] = 1;
 }
 
-int data_structure::disjoint_set::find(int i) {
+int DisjointSet::find(int i) {
   if (this->parent[i] == i) {
     return i;
   } else {
@@ -26,7 +47,7 @@ int data_structure::disjoint_set::find(int i) {
   }
 }
 
-void data_structure::disjoint_set::union_by_rank(int i, int j) {
+void DisjointSet::union_by_rank(int i, int j) {
   int parent_i = this->find(i);
   int parent_j = this->find(j);
   if (parent_i != parent_j) {
@@ -44,18 +65,9 @@ void data_structure::disjoint_set::union_by_rank(int i, int j) {
   }
 }
 
-data_structure::disjoint_set::~disjoint_set() {
+DisjointSet::~DisjointSet() {
   delete[] this->parent;
   delete[] this->rank;
 }
 
-int main(void) {
-  data_structure::disjoint_set tmp = data_structure::disjoint_set(5);
-  tmp.make_set(0);
-  tmp.make_set(1);
-  tmp.make_set(2);
-  tmp.make_set(3);
-  tmp.make_set(4);
-  tmp.union_by_rank(1, 2);
-  std::cout << tmp.find(1) << std::endl;
-}
+#endif
