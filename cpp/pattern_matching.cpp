@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 std::vector<int> longest_prefix_suffix(const std::string &pattern) {
   int i, len;
@@ -132,9 +133,47 @@ void naive_match(const std::string &content, const std::string &pattern) {
   }
 }
 
+void bad_char_heuristic_match(const std::string &content, const std::string &pattern) {
+  int m = content.size();
+  int n = pattern.size();
+
+  const int NUM_CHARS = 256;
+
+  char map[NUM_CHARS] = {-1};
+
+  for (int i = 0; i < pattern.size(); i++) {
+    map[pattern[i]] = i;
+  }
+
+  int i, j = 0;
+
+  while (j <= m - n) {
+    for (i = n - 1; i >= 0; i--) {
+      if (content[j+i] != pattern[i]) {
+        break;
+      }
+    }
+    if (i == -1) {
+      std::cout << "match at position " << j << std::endl;
+      /**there is a match in the current stating position j, we move on to the next
+       * position: if the next guess is a match, then the next immediate position
+       * after the current pattern, i.e., j + n must be a match. In addition, we need
+       * to move as little as possible to avoid skipping matches. Therefore, we use
+       * the largest index of the occurence as a reference.
+      ***/
+      j += j + n < m ? map[content[j+n]] : 1;
+    } else {
+      j += std::max(1, i - map[content[j+i]]);
+    }
+  }
+}
+
+
 int main() {
   std::string content = "AABAACAADAABAABA";
   std::string pattern = "AABA";
+  
   kmp_match(content, pattern);
   naive_match(content, pattern);
+  bad_char_heuristic_match(content, pattern);
 }
