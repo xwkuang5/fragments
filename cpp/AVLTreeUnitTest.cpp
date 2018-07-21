@@ -1,7 +1,3 @@
-/**
- * Compile command: g++ -o test AVLTreeUnitTest.cpp -lboost_unit_test_framework
- */
-
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE Simple testcases 2
 #include <boost/test/unit_test.hpp>

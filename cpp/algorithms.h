@@ -20,4 +20,6 @@ int *naive_maximum_subarray(int *array, int low, int high);
 int randomized_partition(int *array, int low, int high);
 int randomized_select(int *array, int low, int high, int i);
 
+float linear_time_median(int *arr, int low, int high);
+
 #endif

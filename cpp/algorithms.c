@@ -162,4 +162,28 @@ int inversion_n_k(int n, int k) {
   return ret;
 }
 
-int main() { printf("number of inversion is %d\n", inversion_n_k(1, 1)); }
+float linear_time_median(int *arr, int low, int high) {
+  int size = high - low + 1;
+
+  if (size == 1) {
+    return arr[low];
+  } else if (size == 2) {
+    return (arr[low] + arr[high]) / 2.0;
+  } else {
+    if (size % 2 == 0) {
+      return (randomized_select(arr, low, high, size / 2) + randomized_select(arr, low, high, size / 2 + 1)) / 2.0;
+    } else {
+      return randomized_select(arr, low, high, size / 2 + 1);
+    }
+  }
+}
+
+int main() { 
+  // printf("number of inversion is %d\n", inversion_n_k(1, 1)); 
+
+  int arr[] = {1, 2, 3, 4, 5, 6};
+  int low = 0;
+  int high = sizeof(arr) / sizeof(int) - 1;
+
+  printf("median is %f\n", linear_time_median(arr, low, high));
+}
