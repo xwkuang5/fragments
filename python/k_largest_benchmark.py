@@ -146,6 +146,53 @@ class FindKLargest:
 
         return min_heap._arr
 
+    def quick_select_partition(self, low, high, list_):
+
+        pivot = list_[high]
+
+        i = low - 1
+        j = low
+
+        while j <= high - 1:
+
+            if list_[j] <= pivot:
+                i += 1
+                list_[i], list_[j] = list_[j], list_[i]
+            
+            j += 1
+        
+        i += 1
+        list_[i], list_[high] = list_[high], list_[i]
+
+        return i
+
+    def quick_select_util(self, low, high, list_, k):
+        
+        num_elements = high - low + 1
+
+        if num_elements <= k:
+            return list_[low:high+1]
+        elif k == 0:
+            return []
+        else:
+            
+            pivot_pos = self.quick_select_partition(low, high, list_)
+
+            num_in_right = high - pivot_pos
+
+            if num_in_right >= k:
+                return self.quick_select_util(pivot_pos + 1, high, list_, k)
+            else:
+                return self.quick_select_util(low, pivot_pos - 1, list_, k - num_in_right - 1) + list_[pivot_pos:high+1]
+
+
+    def quick_select_top_k(self, list_):
+
+        list_copy = list_[:]
+
+        return self.quick_select_util(0, len(list_) - 1, list_copy, self._k)
+
+
 
 def iterate_heap(heap):
 
@@ -177,7 +224,8 @@ for k in x_seq:
     func_list = [
         partial(dummy.sortAndReturnKLargest),
         partial(dummy.buildCompleteHeapAndReturnKLargest),
-        partial(dummy.buildHeapOfSizeKAndReturnKLargest)
+        partial(dummy.buildHeapOfSizeKAndReturnKLargest),
+        partial(dummy.quick_select_top_k)
     ]
 
     k_history = []
@@ -192,11 +240,12 @@ for k in x_seq:
 
     history.append(k_history)
 
-history = np.array(history).reshape(3, -1)
+history = np.array(history).reshape(4, -1)
 
 plt.plot(x_seq, history[0], 'r', label='sorting')
 plt.plot(x_seq, history[1], 'b', label='build large heap')
 plt.plot(x_seq, history[2], 'g', label='build small heap')
+plt.plot(x_seq, history[3], 'y', label='quick select')
 plt.xticks(x_seq)
 
 plt.legend()

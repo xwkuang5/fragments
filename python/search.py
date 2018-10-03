@@ -47,6 +47,27 @@ def binary_search(arr, low, high, key):
 
     return low
 
+def binary_search_return_first_invariant(arr, low, high, key):
+
+    """
+    maintain invariant of arr[low] < key <= arr[high]
+    """
+
+    if arr[low] >= key:
+        return low
+    if arr[high] < key:
+        return high + 1
+    
+    while low + 1 < high:
+        mid = (low + high) // 2
+
+        if arr[mid] < key:
+            low = mid
+        else:
+            high = mid
+    # in the end low + 1 = high and arr[low] < mid <= arr[high] => return high
+    return high
+
 def binary_search_return_first(arr, low, high, key):
 
     l = low

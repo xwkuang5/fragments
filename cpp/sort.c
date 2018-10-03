@@ -56,7 +56,7 @@ int hoare_partition(int *array, int low, int high) {
   int i = low - 1;
   int j = high + 1;
   int pivot = array[high];
-  while (true) {
+  while (1) {
     while (array[++i] < pivot)
       ;
     while (array[--j] >= pivot)
