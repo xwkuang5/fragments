@@ -1,15 +1,17 @@
 class TrieNode:
     """A character trie node
     """
+
     def __init__(self, val):
 
         self._val = val
         self._children = {}
 
+
 class Trie:
     """A character trie
     """
-    
+
     def __init__(self):
 
         self._root = TrieNode(None)
@@ -22,9 +24,8 @@ class Trie:
                 return None
             else:
                 node = node._children[ch]
-        
-        return node._val
 
+        return node._val
 
     def insert(self, key, val):
 
@@ -43,7 +44,7 @@ class Trie:
             for ch in key[last_idx:]:
                 node._children[ch] = TrieNode(None)
                 node = node._children[ch]
-            
+
         node._val = val
 
     def remove(self, key):
@@ -59,7 +60,7 @@ class Trie:
         for ch in key:
             stack.append((node, ch))
             node = node._children[ch]
-        
+
         node.val = None
 
         while len(stack) > 0 and len(node._children) == 0:

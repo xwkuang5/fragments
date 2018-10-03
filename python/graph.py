@@ -1,8 +1,8 @@
 from collections import defaultdict
 from collections import deque
 
-class DirectedGraph:
 
+class DirectedGraph:
     def __init__(self, V):
 
         self.V = list(range(V))
@@ -14,7 +14,6 @@ class DirectedGraph:
         self.edges[u].append(v)
 
     def bi_search(self, src, dst):
-
         def intersect(src_visited, dst_visited):
 
             for i in range(len(src_visited)):
@@ -42,7 +41,7 @@ class DirectedGraph:
             while parent != -1:
                 to_path.append(parent)
                 parent = dst_parents[parent]
-            
+
             from_path = []
 
             parent = src_parents[node]
@@ -50,9 +49,8 @@ class DirectedGraph:
             while parent != -1:
                 from_path.append(parent)
                 parent = src_parents[parent]
-            
-            return from_path[::-1] + to_path
 
+            return from_path[::-1] + to_path
 
         src_queue = deque()
         dst_queue = deque()
@@ -78,5 +76,5 @@ class DirectedGraph:
 
             if node != -1:
                 return get_path(node, src_parents, dst_parents)
-        
+
         return -1

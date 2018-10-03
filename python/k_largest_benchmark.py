@@ -26,8 +26,8 @@ class Heap:
 
         ret = self._arr[0]
 
-        self._arr[0], self._arr[self._size - 1] = self._arr[self._size
-                                                            - 1], self._arr[0]
+        self._arr[0], self._arr[self._size - 1] = self._arr[self._size -
+                                                            1], self._arr[0]
 
         self._size -= 1
 
@@ -158,24 +158,24 @@ class FindKLargest:
             if list_[j] <= pivot:
                 i += 1
                 list_[i], list_[j] = list_[j], list_[i]
-            
+
             j += 1
-        
+
         i += 1
         list_[i], list_[high] = list_[high], list_[i]
 
         return i
 
     def quick_select_util(self, low, high, list_, k):
-        
+
         num_elements = high - low + 1
 
         if num_elements <= k:
-            return list_[low:high+1]
+            return list_[low:high + 1]
         elif k == 0:
             return []
         else:
-            
+
             pivot_pos = self.quick_select_partition(low, high, list_)
 
             num_in_right = high - pivot_pos
@@ -183,15 +183,15 @@ class FindKLargest:
             if num_in_right >= k:
                 return self.quick_select_util(pivot_pos + 1, high, list_, k)
             else:
-                return self.quick_select_util(low, pivot_pos - 1, list_, k - num_in_right - 1) + list_[pivot_pos:high+1]
-
+                return self.quick_select_util(
+                    low, pivot_pos - 1, list_,
+                    k - num_in_right - 1) + list_[pivot_pos:high + 1]
 
     def quick_select_top_k(self, list_):
 
         list_copy = list_[:]
 
         return self.quick_select_util(0, len(list_) - 1, list_copy, self._k)
-
 
 
 def iterate_heap(heap):
@@ -210,12 +210,12 @@ import time
 import numpy as np
 from functools import partial
 
-n = 1000000
+n = 2**20
 random_seq = list(np.random.randint(0, 10000, size=n))
 
 history = []
 
-x_seq = [2**i for i in range(18)]
+x_seq = [2**i for i in range(20)]
 
 for k in x_seq:
 

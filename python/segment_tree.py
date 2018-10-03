@@ -1,6 +1,7 @@
 import sys
 import math
 
+
 class SegmentTree:
     """
     1. Properties of rangeSum with Segmentree:
@@ -15,13 +16,13 @@ class SegmentTree:
     """
 
     def __init__(self, arr, tree_type='sum'):
-        
+
         height = math.ceil(math.log2(len(arr)))
         self._tree_size = int(2 * math.pow(2, height) - 1)
         self._size = len(arr)
         self._tree_type = tree_type
         self._arr = [None] * self._tree_size
-        self._construct(0, 0, self._size-1, self._arr, arr, tree_type)
+        self._construct(0, 0, self._size - 1, self._arr, arr, tree_type)
 
     def _construct(self, root, l, r, tree_arr, arr, tree_type):
 
@@ -35,7 +36,7 @@ class SegmentTree:
             right = self._right(root)
 
             self._construct(left, l, mid, tree_arr, arr, tree_type)
-            self._construct(right, mid+1, r, tree_arr, arr, tree_type)
+            self._construct(right, mid + 1, r, tree_arr, arr, tree_type)
 
             if tree_type == 'sum':
                 tree_arr[root] = tree_arr[left] + tree_arr[right]
@@ -58,7 +59,7 @@ class SegmentTree:
             else:
                 l = mid + 1
                 root = self._right(root)
-        
+
         self._arr[root] = min(self._arr[root], val)
 
     def _update_range_sum(self, idx, val):
@@ -76,12 +77,12 @@ class SegmentTree:
             else:
                 l = mid + 1
                 root = self._right(root)
-        
+
         diff = val - self._arr[root]
 
         l = 0
         r = self._size - 1
-        
+
         root = 0
 
         while l < r:
@@ -124,7 +125,7 @@ class SegmentTree:
             mid = (low + high) // 2
 
             left = self._query_helper(self._left(root), l, r, low, mid)
-            right = self._query_helper(self._right(root), l, r, mid+1, high)
+            right = self._query_helper(self._right(root), l, r, mid + 1, high)
 
             if self._tree_type == 'sum':
                 return left + right
@@ -136,7 +137,6 @@ class SegmentTree:
     def query(self, l, r):
 
         return self._query_helper(0, l, r, 0, self._size - 1)
-
 
     def _left(self, i):
         return 2 * i + 1

@@ -3,7 +3,7 @@ class PriorityQueue:
     """
 
     def __init__(self, arr):
-        
+
         self._map_key_to_idx = {}
 
         self._size = len(arr)
@@ -13,12 +13,12 @@ class PriorityQueue:
 
     def is_empty(self):
         return self._size == 0
-    
+
     def insert(self, key):
         self._arr.append(key)
         self._size += 1
 
-        self._bubble_up(self._size-1)
+        self._bubble_up(self._size - 1)
 
     def pop(self):
         assert not self.is_empty(), "Can not pop element from empty queue"
@@ -75,7 +75,7 @@ class PriorityQueue:
             if right_child < self._size and min_val > self._arr[right_child]:
                 min_idx = right_child
                 min_val = self._arr[right_child]
-            
+
             if min_idx != i:
                 self._swap(i, min_idx)
                 i = min_idx
@@ -84,7 +84,7 @@ class PriorityQueue:
 
     def _left_child(self, i):
         return 2 * i + 1
-    
+
     def _right_child(self, i):
         return 2 * (i + 1)
 
@@ -93,6 +93,7 @@ class PriorityQueue:
 
     def _start_of_child(self):
         return self._size // 2
+
 
 arr = [5, 4, 3, 2, 1]
 

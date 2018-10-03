@@ -47,8 +47,8 @@ def binary_search(arr, low, high, key):
 
     return low
 
-def binary_search_return_first_invariant(arr, low, high, key):
 
+def binary_search_return_first_invariant(arr, low, high, key):
     """
     maintain invariant of arr[low] < key <= arr[high]
     """
@@ -57,7 +57,7 @@ def binary_search_return_first_invariant(arr, low, high, key):
         return low
     if arr[high] < key:
         return high + 1
-    
+
     while low + 1 < high:
         mid = (low + high) // 2
 
@@ -67,6 +67,7 @@ def binary_search_return_first_invariant(arr, low, high, key):
             high = mid
     # in the end low + 1 = high and arr[low] < mid <= arr[high] => return high
     return high
+
 
 def binary_search_return_first(arr, low, high, key):
 
@@ -86,7 +87,8 @@ def binary_search_return_first(arr, low, high, key):
     if arr[l] >= key:
         return l
     else:
-        return l+1
+        return l + 1
+
 
 def binary_search_return_last(arr, low, high, key):
 
@@ -101,15 +103,15 @@ def binary_search_return_last(arr, low, high, key):
             l = m
         else:
             h = m - 1
-    
+
     # in the end, l = high and low <= l = h <= high must be true
     if arr[l] >= key:
         return l
     else:
-        return l+1
+        return l + 1
+
 
 class TestBinarySearch(unittest.TestCase):
-
     def test_unique_key_exists(self):
 
         arr = [1, 2, 3, 4, 5, 6, 7, 8]
@@ -126,7 +128,7 @@ class TestBinarySearch(unittest.TestCase):
             self.assertEqual(arr[ret1], val)
             self.assertEqual(ret1, ret2)
             self.assertEqual(ret2, ret3)
-    
+
     def test_duplicate_key_exists(self):
 
         arr = [1, 2, 3, 3, 4, 5, 5, 5, 5, 5, 6, 7, 7, 7]
@@ -154,21 +156,22 @@ class TestBinarySearch(unittest.TestCase):
 
         for idx, val in enumerate(arr):
 
-            ret1 = binary_search(arr, low, high, val-0.5)
-            ret2 = binary_search_return_first(arr, low, high, val-0.5)
-            ret3 = binary_search_return_last(arr, low, high, val-0.5)
+            ret1 = binary_search(arr, low, high, val - 0.5)
+            ret2 = binary_search_return_first(arr, low, high, val - 0.5)
+            ret3 = binary_search_return_last(arr, low, high, val - 0.5)
 
             self.assertEqual(idx, ret1)
             self.assertEqual(ret1, ret2)
             self.assertEqual(ret1, ret3)
 
-            ret1 = binary_search(arr, low, high, val+0.5)
-            ret2 = binary_search_return_first(arr, low, high, val+0.5)
-            ret3 = binary_search_return_last(arr, low, high, val+0.5)
+            ret1 = binary_search(arr, low, high, val + 0.5)
+            ret2 = binary_search_return_first(arr, low, high, val + 0.5)
+            ret3 = binary_search_return_last(arr, low, high, val + 0.5)
 
-            self.assertEqual(idx+1, ret1)
+            self.assertEqual(idx + 1, ret1)
             self.assertEqual(ret1, ret2)
             self.assertEqual(ret1, ret3)
+
 
 if __name__ == "__main__":
 
