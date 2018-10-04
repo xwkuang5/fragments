@@ -1,12 +1,13 @@
 class Node:
-
     def __init__(self, val, left, right):
         self._val = val
         self._left = left
         self._right = right
 
+
 def traverse(node):
     print(node._val)
+
 
 def construct_tree_from_array(arr):
     size = len(arr)
@@ -16,17 +17,18 @@ def construct_tree_from_array(arr):
 
     for i in range(start_of_children, size):
         node_arr[i] = Node(arr[i], None, None)
-    
+
     for i in reversed(range(start_of_children)):
         left_child = i * 2 + 1
         right_child = (i + 1) * 2
 
         node_arr[i] = Node(arr[i], node_arr[left_child], node_arr[right_child])
-    
+
     return node_arr[0]
 
+
 def preorder_traversal_iterative(node):
-    
+
     stack = [node]
 
     while len(stack) != 0:
@@ -37,6 +39,7 @@ def preorder_traversal_iterative(node):
             stack.append(node._right)
         if node._left is not None:
             stack.append(node._left)
+
 
 def postorder_traversal_iterative(node):
     seen = set()
@@ -66,8 +69,9 @@ def postorder_traversal_iterative(node):
                 stack.append(node._right)
                 stack.append(node._left)
 
+
 def inorder_traversal_iterative(node):
-    
+
     seen = set()
 
     stack = [node]
@@ -93,6 +97,7 @@ def inorder_traversal_iterative(node):
                 stack.append(node._right)
                 stack.append(node)
                 stack.append(node._left)
+
 
 arr = [1, 2, 3, 4, 5]
 

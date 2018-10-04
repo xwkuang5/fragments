@@ -37,7 +37,7 @@ class HashTableChaining:
         return key in self._arr[hash_val]
 
     def remove(self, key):
-        
+
         hash_val = self._hash_function(key)
 
         if key in self._arr[hash_val]:
@@ -47,6 +47,7 @@ class HashTableChaining:
 
             if self.num_occupied / self._size < self._alpha_low:
                 self._resize(self._size // 2)
+
 
 class HashtableOpenAddressing:
     """Hashtable with open addressing (linear probing)
@@ -79,9 +80,9 @@ class HashtableOpenAddressing:
 
             while self._arr[hash_val] is not None:
                 hash_val += 1
-            
+
             self._arr[hash_val] = key
-    
+
     def insert(self, key):
 
         hash_val = self._hash_function(key)
@@ -94,7 +95,7 @@ class HashtableOpenAddressing:
                 hash_val += 1
             else:
                 break
-        
+
         self._arr[hash_val] = key
         self.num_occupied += 1
 
@@ -108,7 +109,7 @@ class HashtableOpenAddressing:
         while self._arr[hash_val] is not None:
             if self._arr[hash_val] == key:
                 return True
-        
+
         return False
 
     def remove(self, key):
