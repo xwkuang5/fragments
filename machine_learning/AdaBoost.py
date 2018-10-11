@@ -201,10 +201,11 @@ class AdaBoost:
                 weights = np.ones(train_Y.shape)
             else:
                 weights = np.exp(
-                    np.multiply(-1 * train_Y,
-                                np.dot(
-                                    self.prediction_vector(train_X),
-                                    self._base_learners_weights)))
+                    np.multiply(
+                        -1 * train_Y,
+                        np.dot(
+                            self.prediction_vector(train_X),
+                            self._base_learners_weights)))
 
             # readjust training distributions
             distribution = weights / weights.sum()
@@ -215,8 +216,7 @@ class AdaBoost:
 
             correct_prediction_idx = [
                 idx for idx in range(train_X.shape[0])
-                if train_Y[idx] == weak_hypothesis.classification(
-                    train_X[idx])
+                if train_Y[idx] == weak_hypothesis.classification(train_X[idx])
             ]
 
             wt_plus = weights[correct_prediction_idx].sum()

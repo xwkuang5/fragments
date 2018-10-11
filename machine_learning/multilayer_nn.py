@@ -144,9 +144,9 @@ class SimpleNeuralNetwork:
             self.bn_mean[
                 "l" + str(i)] = self.bn_beta * self.bn_mean["l" + str(i)] + (
                     1 - self.bn_beta) * mean
-            self.bn_var[
-                "l" + str(i)] = self.bn_beta * self.bn_var["l" + str(i)] + (
-                    1 - self.bn_beta) * var
+            self.bn_var["l" +
+                        str(i)] = self.bn_beta * self.bn_var["l" + str(i)] + (
+                            1 - self.bn_beta) * var
 
             caches += [cache]
 
@@ -271,14 +271,14 @@ class SimpleNeuralNetwork:
         }  # Initializing second moment estimate, python dictionary
 
         for l in range(1, len(self.layers)):
-            self.velocity["dW"
-                          + str(l)] = beta1 * self.velocity["dW" + str(l)] + (
+            self.velocity["dW" +
+                          str(l)] = beta1 * self.velocity["dW" + str(l)] + (
                               1 - beta1) * grads["dW" + str(l)]
-            self.velocity["dr"
-                          + str(l)] = beta1 * self.velocity["dr" + str(l)] + (
+            self.velocity["dr" +
+                          str(l)] = beta1 * self.velocity["dr" + str(l)] + (
                               1 - beta1) * grads["dr" + str(l)]
-            self.velocity["db"
-                          + str(l)] = beta1 * self.velocity["db" + str(l)] + (
+            self.velocity["db" +
+                          str(l)] = beta1 * self.velocity["db" + str(l)] + (
                               1 - beta1) * grads["db" + str(l)]
             v_corrected["dW" + str(l)] = self.velocity["dW" + str(l)] / (
                 1 - math.pow(beta1, time))
@@ -287,14 +287,14 @@ class SimpleNeuralNetwork:
             v_corrected["db" + str(l)] = self.velocity["db" + str(l)] / (
                 1 - math.pow(beta1, time))
 
-            self.squares["dW"
-                         + str(l)] = beta2 * self.squares["dW" + str(l)] + (
+            self.squares["dW" +
+                         str(l)] = beta2 * self.squares["dW" + str(l)] + (
                              1 - beta2) * np.square(grads["dW" + str(l)])
-            self.squares["dr"
-                         + str(l)] = beta2 * self.squares["dr" + str(l)] + (
+            self.squares["dr" +
+                         str(l)] = beta2 * self.squares["dr" + str(l)] + (
                              1 - beta2) * np.square(grads["dr" + str(l)])
-            self.squares["db"
-                         + str(l)] = beta2 * self.squares["db" + str(l)] + (
+            self.squares["db" +
+                         str(l)] = beta2 * self.squares["db" + str(l)] + (
                              1 - beta2) * np.square(grads["db" + str(l)])
             s_corrected["dW" + str(l)] = self.squares["dW" + str(l)] / (
                 1 - math.pow(beta2, time))

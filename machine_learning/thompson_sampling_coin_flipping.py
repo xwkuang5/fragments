@@ -255,8 +255,8 @@ class UCBPlayer:
         exploitation_bonus = np.divide(
             self._parameters[:, 0], self._parameters.sum(axis=1))
 
-        exploration_bonus = np.sqrt(2 * np.log(self._iteration) /
-                                    (self._parameters.sum(axis=1) - 2))
+        exploration_bonus = np.sqrt(
+            2 * np.log(self._iteration) / (self._parameters.sum(axis=1) - 2))
 
         return exploitation_bonus + exploration_bonus
 

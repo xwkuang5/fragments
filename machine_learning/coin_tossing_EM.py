@@ -155,9 +155,9 @@ class CoinTossEMEstimator:
         p_xi_z_handle = partial(self.p_xi_z, thetas=self._thetas_hat)
 
         return sum([
-            np.dot(self._Qi_zk[i],
-                   np.log(
-                       np.divide(p_xi_z_handle(samples[i]), self._Qi_zk[i])))
+            np.dot(
+                self._Qi_zk[i],
+                np.log(np.divide(p_xi_z_handle(samples[i]), self._Qi_zk[i])))
             for i in range(samples.shape[0])
         ])
 
