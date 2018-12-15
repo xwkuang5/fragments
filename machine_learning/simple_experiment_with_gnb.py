@@ -51,8 +51,8 @@ import matplotlib.pyplot as plt
 
 plt.rc(
     'axes',
-    prop_cycle=(cycler('color', ['r', 'g', 'b', 'y']) + cycler(
-        'linestyle', ['-', '--', ':', '-.'])))
+    prop_cycle=(cycler('color', ['r', 'g', 'b', 'y']) +
+                cycler('linestyle', ['-', '--', ':', '-.'])))
 
 ys = np.array(result)
 

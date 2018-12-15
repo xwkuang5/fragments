@@ -26,8 +26,8 @@ class Heap:
 
         ret = self._arr[0]
 
-        self._arr[0], self._arr[self._size - 1] = self._arr[self._size -
-                                                            1], self._arr[0]
+        self._arr[0], self._arr[self._size - 1] = self._arr[self._size
+                                                            - 1], self._arr[0]
 
         self._size -= 1
 

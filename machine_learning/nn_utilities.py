@@ -115,16 +115,16 @@ def random_mini_batches(X,
     num_complete_minibatches = math.floor(m / mini_batch_size)
     for k in range(0, num_complete_minibatches):
         if input_format == "one_hot":
-            mini_batch_X = shuffled_X[:, k * mini_batch_size:(k + 1) *
-                                      mini_batch_size]
-            mini_batch_Y = shuffled_Y[:, k * mini_batch_size:(k + 1) *
-                                      mini_batch_size]
+            mini_batch_X = shuffled_X[:, k * mini_batch_size:(
+                k + 1) * mini_batch_size]
+            mini_batch_Y = shuffled_Y[:, k * mini_batch_size:(
+                k + 1) * mini_batch_size]
 
         else:
-            mini_batch_X = shuffled_X[k * mini_batch_size:(k + 1) *
-                                      mini_batch_size, :]
-            mini_batch_Y = shuffled_Y[k * mini_batch_size:(k + 1) *
-                                      mini_batch_size, :]
+            mini_batch_X = shuffled_X[k * mini_batch_size:(
+                k + 1) * mini_batch_size, :]
+            mini_batch_Y = shuffled_Y[k * mini_batch_size:(
+                k + 1) * mini_batch_size, :]
 
         mini_batch = (mini_batch_X, mini_batch_Y)
         mini_batches.append(mini_batch)
@@ -470,7 +470,8 @@ def softmax_backward(dA, Z):
     # How do I vectorize this?
     stacked_prev = -np.stack(
         [np.outer(A[:, i], A[:, i]) for i in range(A.shape[1])]) + np.stack([
-            np.multiply(np.eye(A.shape[0]), A[:, i]) for i in range(A.shape[1])
+            np.multiply(np.eye(A.shape[0]), A[:, i])
+            for i in range(A.shape[1])
         ])
     matrix = np.rollaxis(stacked_prev, 0, 3)
 

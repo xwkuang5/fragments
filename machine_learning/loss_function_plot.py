@@ -1,9 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def logistic_loss(x):
 
     return np.log(1 + np.exp(1 - x))
+
 
 def hinge_loss(x):
 
@@ -12,7 +14,8 @@ def hinge_loss(x):
     tmp[np.where(tmp <= 0)] = 0
 
     return tmp
-    
+
+
 def squared_hinge_loss(x):
 
     tmp = 1 - x
@@ -20,6 +23,7 @@ def squared_hinge_loss(x):
     tmp[np.where(tmp <= 0)] = 0
 
     return np.square(tmp)
+
 
 x = np.arange(-4, 4, 0.001)
 
