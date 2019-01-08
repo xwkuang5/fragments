@@ -2,7 +2,7 @@
 
 This repository contains codes that I wrote when learning new algorithms/techniques.
 
-* `Datasets`: directory for small datasets that are used for demonstration
+* `datasets`: directory for small datasets that are used for demonstration
 * `artificial_intelligence`: directory for algorithms related to Artificial Intelligence
 * `cpp`: directory for algorithms or data structures in C++
 * `haskell`: directory for algorithms written in Haskell
