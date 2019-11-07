@@ -30,7 +30,7 @@ class PriorityQueue:
         self._arr.pop()
 
         self._bubble_down(0)
-
+        self._map_key_to_idx.pop(ret)
         return ret
 
     def decrease_key(self, key, decrement):
