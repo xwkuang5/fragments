@@ -168,7 +168,8 @@ public final class NfaRegexMatcher {
 		abstract ImmutableList<Consumer<State>> fringes();
 
 		private static Fragment from(InputState start) {
-			return new AutoValue_NfaRegexMatcher_Fragment(State.ofInput(start), ImmutableList.of(start::setNext));
+			return new AutoValue_NfaRegexMatcher_Fragment(State.ofInput(start),
+					ImmutableList.of(start::setNext));
 		}
 
 		private static Fragment create(State start, ImmutableList<Consumer<State>> fringes) {

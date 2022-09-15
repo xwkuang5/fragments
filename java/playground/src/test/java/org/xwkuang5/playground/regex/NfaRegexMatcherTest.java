@@ -3,7 +3,6 @@ package org.xwkuang5.playground.regex;
 import static com.google.common.truth.Truth.assertThat;
 
 import org.junit.jupiter.api.Test;
-import org.xwkuang5.playground.regex.NfaRegexMatcher;
 
 public final class NfaRegexMatcherTest {
 
