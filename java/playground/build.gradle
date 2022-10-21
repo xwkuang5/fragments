@@ -12,6 +12,8 @@ repositories {
 dependencies {
 	implementation("com.google.guava:guava:31.1-jre")
 	implementation 'org.jspecify:jspecify:0.2.0'
+	// https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java
+	implementation group: 'com.google.protobuf', name: 'protobuf-java', version: '3.21.8'
 	compileOnly         "com.google.auto.value:auto-value-annotations:1.9"
 	annotationProcessor "com.google.auto.value:auto-value:1.9"
 	testImplementation "com.google.truth:truth:1.1.3"
