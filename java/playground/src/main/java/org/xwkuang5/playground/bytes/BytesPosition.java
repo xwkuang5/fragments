@@ -19,12 +19,12 @@ abstract class BytesPosition implements Comparable<BytesPosition> {
 
 	abstract ByteString bytes();
 
-	static BytesPosition create(byte[] bytes) {
+	static BytesPosition before(byte[] bytes) {
 		checkArgument(bytes.length >= 1);
 		return new AutoValue_BytesPosition(/* isSuffixInfinity= */ false, ByteString.copyFrom(bytes));
 	}
 
-	static BytesPosition successor(byte[] bytes) {
+	static BytesPosition after(byte[] bytes) {
 		checkArgument(bytes.length >= 1);
 		return new AutoValue_BytesPosition(/* isSuffixInfinity= */ true, ByteString.copyFrom(bytes));
 	}

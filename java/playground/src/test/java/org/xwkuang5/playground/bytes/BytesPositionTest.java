@@ -12,15 +12,15 @@ public final class BytesPositionTest {
 	@Test
 	public void compareTo() {
 		ComparisonTesterBuilder.<BytesPosition>builder()
-				.addEqualityGroup(BytesPosition.create(new byte[]{0x01}))
-				.addEqualityGroup(BytesPosition.create(new byte[]{0x01, 0x02}))
-				.addEqualityGroup(BytesPosition.create(new byte[]{0x01, 0x02, 0x03}))
-				.addEqualityGroup(BytesPosition.successor(new byte[]{0x01}))
-				.addEqualityGroup(BytesPosition.create(new byte[]{0x02}))
-				.addEqualityGroup(BytesPosition.create(new byte[]{0x02, 0x01}))
-				.addEqualityGroup(BytesPosition.successor(new byte[]{0x02, 0x01}))
-				.addEqualityGroup(BytesPosition.create(new byte[]{0x02, 0x02, 0x02}))
-				.addEqualityGroup(BytesPosition.successor(new byte[]{0x03}))
+				.addEqualityGroup(BytesPosition.before(new byte[]{0x01}))
+				.addEqualityGroup(BytesPosition.before(new byte[]{0x01, 0x02}))
+				.addEqualityGroup(BytesPosition.before(new byte[]{0x01, 0x02, 0x03}))
+				.addEqualityGroup(BytesPosition.after(new byte[]{0x01}))
+				.addEqualityGroup(BytesPosition.before(new byte[]{0x02}))
+				.addEqualityGroup(BytesPosition.before(new byte[]{0x02, 0x01}))
+				.addEqualityGroup(BytesPosition.after(new byte[]{0x02, 0x01}))
+				.addEqualityGroup(BytesPosition.before(new byte[]{0x02, 0x02, 0x02}))
+				.addEqualityGroup(BytesPosition.after(new byte[]{0x03}))
 				.test();
 	}
 
