@@ -7,20 +7,20 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.Assert.assertThrows;
 
-public final class BytesEndpointTest {
+public final class BytesPositionTest {
 
 	@Test
 	public void compareTo() {
-		ComparisonTesterBuilder.<BytesEndpoint>builder()
-				.addEqualityGroup(BytesEndpoint.create(new byte[]{0x01}))
-				.addEqualityGroup(BytesEndpoint.create(new byte[]{0x01, 0x02}))
-				.addEqualityGroup(BytesEndpoint.create(new byte[]{0x01, 0x02, 0x03}))
-				.addEqualityGroup(BytesEndpoint.successor(new byte[]{0x01}))
-				.addEqualityGroup(BytesEndpoint.create(new byte[]{0x02}))
-				.addEqualityGroup(BytesEndpoint.create(new byte[]{0x02, 0x01}))
-				.addEqualityGroup(BytesEndpoint.successor(new byte[]{0x02, 0x01}))
-				.addEqualityGroup(BytesEndpoint.create(new byte[]{0x02, 0x02, 0x02}))
-				.addEqualityGroup(BytesEndpoint.successor(new byte[]{0x03}))
+		ComparisonTesterBuilder.<BytesPosition>builder()
+				.addEqualityGroup(BytesPosition.create(new byte[]{0x01}))
+				.addEqualityGroup(BytesPosition.create(new byte[]{0x01, 0x02}))
+				.addEqualityGroup(BytesPosition.create(new byte[]{0x01, 0x02, 0x03}))
+				.addEqualityGroup(BytesPosition.successor(new byte[]{0x01}))
+				.addEqualityGroup(BytesPosition.create(new byte[]{0x02}))
+				.addEqualityGroup(BytesPosition.create(new byte[]{0x02, 0x01}))
+				.addEqualityGroup(BytesPosition.successor(new byte[]{0x02, 0x01}))
+				.addEqualityGroup(BytesPosition.create(new byte[]{0x02, 0x02, 0x02}))
+				.addEqualityGroup(BytesPosition.successor(new byte[]{0x03}))
 				.test();
 	}
 

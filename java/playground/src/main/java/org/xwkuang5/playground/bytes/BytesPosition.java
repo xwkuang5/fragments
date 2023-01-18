@@ -7,34 +7,37 @@ import com.google.protobuf.ByteString;
 import java.nio.charset.Charset;
 
 /**
- * Represents an endpoint in the space formed by all arrays of bytes.
+ * Represents a position in the space formed by all arrays of bytes.
  *
- * <p>Supports prefix successor point that represent the location just after all bytes sharing the same prefix.
+ * <p>Supports prefix successor point that represent the location just after all bytes sharing the
+ * same prefix.
  */
 @AutoValue
-abstract class BytesEndpoint implements Comparable<BytesEndpoint> {
+abstract class BytesPosition implements Comparable<BytesPosition> {
 
 	abstract boolean isSuffixInfinity();
+
 	abstract ByteString bytes();
 
-	static BytesEndpoint create(byte[] bytes) {
+	static BytesPosition create(byte[] bytes) {
 		checkArgument(bytes.length >= 1);
-		return new AutoValue_BytesEndpoint(/* isSuffixInfinity= */ false, ByteString.copyFrom(bytes));
+		return new AutoValue_BytesPosition(/* isSuffixInfinity= */ false, ByteString.copyFrom(bytes));
 	}
 
-	static BytesEndpoint successor(byte[] bytes) {
+	static BytesPosition successor(byte[] bytes) {
 		checkArgument(bytes.length >= 1);
-		return new AutoValue_BytesEndpoint(/* isSuffixInfinity= */ true, ByteString.copyFrom(bytes));
+		return new AutoValue_BytesPosition(/* isSuffixInfinity= */ true, ByteString.copyFrom(bytes));
 	}
 
 	@Override
-	public int compareTo(BytesEndpoint other) {
+	public int compareTo(BytesPosition other) {
 		int size = bytes().size();
 		int otherSize = other.bytes().size();
 		int minSize = Math.min(size, otherSize);
 
 		int cmp = bytes().substring(0, minSize)
-				.toString(Charset.defaultCharset()).compareTo(other.bytes().substring(0, minSize).toString(Charset.defaultCharset()));
+				.toString(Charset.defaultCharset())
+				.compareTo(other.bytes().substring(0, minSize).toString(Charset.defaultCharset()));
 
 		if (cmp != 0) {
 			return cmp;
