@@ -6,7 +6,6 @@ import static org.xwkuang5.playground.bytes.BytesPosition.after;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Range;
-import java.util.ArrayList;
 import org.junit.jupiter.api.Test;
 
 final class BytesRangeTest {
@@ -33,5 +32,27 @@ final class BytesRangeTest {
 		assertThat(range.max(after(new byte[]{0x01}))).isEqualTo(after(new byte[]{0x01}));
 		assertThat(range.max(after(new byte[]{0x02}))).isEqualTo(after(new byte[]{0x02}));
 		assertThat(range.max(after(new byte[]{0x03}))).isEqualTo(after(new byte[]{0x03}));
+	}
+
+	@Test
+	public void restrict_openOpen_openOpen() {
+		var range = BytesRange.create(ImmutableList.of(Range.open((byte) 0x01, (byte) 0x03),
+				Range.open((byte) 0x01, (byte) 0x03)));
+
+		assertThat(range.max(before(new byte[]{0x01}))).isEqualTo(after(new byte[]{0x01}));
+		assertThat(range.max(before(new byte[]{0x01, 0x01}))).isEqualTo(after(new byte[]{0x01}));
+		assertThat(range.max(before(new byte[]{0x02}))).isEqualTo(after(new byte[]{0x02, 0x01}));
+		assertThat(range.max(before(new byte[]{0x02, 0x01}))).isEqualTo(after(new byte[]{0x02, 0x01}));
+		assertThat(range.max(before(new byte[]{0x02, 0x02}))).isEqualTo(before(new byte[]{0x02, 0x02}));
+		assertThat(range.max(before(new byte[]{0x02, 0x03}))).isEqualTo(after(new byte[]{0x02}));
+
+		assertThat(range.max(after(new byte[]{0x01}))).isEqualTo(after(new byte[]{0x01}));
+		assertThat(range.max(after(new byte[]{0x01, 0x01}))).isEqualTo(after(new byte[]{0x01, 0x01}));
+		assertThat(range.max(before(new byte[]{0x02}))).isEqualTo(after(new byte[]{0x02}));
+		assertThat(range.max(before(new byte[]{0x02, 0x01}))).isEqualTo(after(new byte[]{0x02, 0x01}));
+		assertThat(range.max(before(new byte[]{0x02, 0x02}))).isEqualTo(after(new byte[]{0x02, 0x02}));
+		assertThat(range.max(before(new byte[]{0x02, 0x03}))).isEqualTo(after(new byte[]{0x02}));
+		assertThat(range.max(before(new byte[]{0x03}))).isEqualTo(after(new byte[]{0x03}));
+		assertThat(range.max(before(new byte[]{0x03, 0x01}))).isEqualTo(after(new byte[]{0x03, 0x01}));
 	}
 }
