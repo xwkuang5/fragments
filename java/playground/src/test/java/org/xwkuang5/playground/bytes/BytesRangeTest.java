@@ -11,48 +11,118 @@ import org.junit.jupiter.api.Test;
 final class BytesRangeTest {
 
 	@Test
-	public void restrict_closedClosed_closedClosed() {
-		var range = BytesRange.create(ImmutableList.of(Range.closed((byte) 0x01, (byte) 0x03),
-				Range.closed((byte) 0x01, (byte) 0x03)));
+	public void restrict_singleRange_closed() {
+		var range = BytesRange.create(ImmutableList.of(Range.closed((byte) 0x01, (byte) 0x03)));
 
-		assertThat(range.max(before(new byte[]{0x01}))).isEqualTo(before(new byte[]{0x01, 0x01}));
-		assertThat(range.max(before(new byte[]{0x01, 0x01}))).isEqualTo(before(new byte[]{0x01, 0x01}));
-		assertThat(range.max(before(new byte[]{0x01, 0x03}))).isEqualTo(before(new byte[]{0x01, 0x03}));
-		assertThat(range.max(before(new byte[]{0x01, 0x04}))).isEqualTo(after(new byte[]{0x01}));
-		assertThat(range.max(before(new byte[]{0x03, 0x01}))).isEqualTo(before(new byte[]{0x03, 0x01}));
-		assertThat(range.max(before(new byte[]{0x03, 0x03}))).isEqualTo(before(new byte[]{0x03, 0x03}));
-		assertThat(range.max(before(new byte[]{0x03, 0x04}))).isEqualTo(after(new byte[]{0x03}));
+		assertThat(range.clip(before(new byte[]{0x00}))).isEqualTo(before(new byte[]{0x01}));
+		assertThat(range.clip(before(new byte[]{0x01}))).isEqualTo(before(new byte[]{0x01}));
+		assertThat(range.clip(before(new byte[]{0x01, 0x01}))).isEqualTo(
+				before(new byte[]{0x01, 0x01}));
+		assertThat(range.clip(before(new byte[]{0x02}))).isEqualTo(before(new byte[]{0x02}));
+		assertThat(range.clip(before(new byte[]{0x03}))).isEqualTo(before(new byte[]{0x03}));
+		assertThat(range.clip(before(new byte[]{0x03, 0x01}))).isEqualTo(
+				before(new byte[]{0x03, 0x01}));
+		assertThat(range.clip(before(new byte[]{0x04}))).isEqualTo(before(new byte[]{0x04}));
 
-		assertThat(range.max(after(new byte[]{0x01, 0x00}))).isEqualTo(before(new byte[]{0x01, 0x01}));
-		assertThat(range.max(after(new byte[]{0x01, 0x01}))).isEqualTo(after(new byte[]{0x01, 0x01}));
-		assertThat(range.max(after(new byte[]{0x01, 0x02}))).isEqualTo(after(new byte[]{0x01, 0x02}));
-		assertThat(range.max(after(new byte[]{0x01, 0x03}))).isEqualTo(after(new byte[]{0x01}));
-		assertThat(range.max(after(new byte[]{0x02, 0x03}))).isEqualTo(after(new byte[]{0x02}));
-		assertThat(range.max(after(new byte[]{0x03, 0x03}))).isEqualTo(after(new byte[]{0x03}));
-		assertThat(range.max(after(new byte[]{0x01}))).isEqualTo(after(new byte[]{0x01}));
-		assertThat(range.max(after(new byte[]{0x02}))).isEqualTo(after(new byte[]{0x02}));
-		assertThat(range.max(after(new byte[]{0x03}))).isEqualTo(after(new byte[]{0x03}));
+		assertThat(range.clip(after(new byte[]{0x00}))).isEqualTo(before(new byte[]{0x01}));
+		assertThat(range.clip(after(new byte[]{0x01}))).isEqualTo(after(new byte[]{0x01}));
+		assertThat(range.clip(after(new byte[]{0x01, 0x01}))).isEqualTo(after(new byte[]{0x01, 0x01}));
+		assertThat(range.clip(after(new byte[]{0x03}))).isEqualTo(after(new byte[]{0x03}));
 	}
 
 	@Test
-	public void restrict_openOpen_openOpen() {
+	public void restrict_singleRange_open() {
+		var range = BytesRange.create(ImmutableList.of(Range.open((byte) 0x01, (byte) 0x03)));
+
+		assertThat(range.clip(before(new byte[]{0x00}))).isEqualTo(after(new byte[]{0x01}));
+		assertThat(range.clip(before(new byte[]{0x01}))).isEqualTo(after(new byte[]{0x01}));
+		assertThat(range.clip(before(new byte[]{0x01, 0x01}))).isEqualTo(after(new byte[]{0x01}));
+		assertThat(range.clip(before(new byte[]{0x02}))).isEqualTo(before(new byte[]{0x02}));
+		assertThat(range.clip(before(new byte[]{0x03}))).isEqualTo(before(new byte[]{0x03}));
+		assertThat(range.clip(before(new byte[]{0x03, 0x01}))).isEqualTo(
+				before(new byte[]{0x03, 0x01}));
+		assertThat(range.clip(before(new byte[]{0x04}))).isEqualTo(before(new byte[]{0x04}));
+
+		assertThat(range.clip(after(new byte[]{0x00}))).isEqualTo(after(new byte[]{0x01}));
+		assertThat(range.clip(after(new byte[]{0x01}))).isEqualTo(after(new byte[]{0x01}));
+		assertThat(range.clip(after(new byte[]{0x01, 0x01}))).isEqualTo(after(new byte[]{0x01}));
+		assertThat(range.clip(after(new byte[]{0x03}))).isEqualTo(after(new byte[]{0x03}));
+	}
+
+	@Test
+	public void restrict_closed_closed() {
+		var range = BytesRange.create(ImmutableList.of(Range.closed((byte) 0x01, (byte) 0x03),
+				Range.closed((byte) 0x01, (byte) 0x03)));
+
+		assertThat(range.clip(before(new byte[]{0x01}))).isEqualTo(before(new byte[]{0x01, 0x01}));
+		assertThat(range.clip(before(new byte[]{0x01, 0x01}))).isEqualTo(
+				before(new byte[]{0x01, 0x01}));
+		assertThat(range.clip(before(new byte[]{0x01, 0x03}))).isEqualTo(
+				before(new byte[]{0x01, 0x03}));
+		assertThat(range.clip(before(new byte[]{0x01, 0x04}))).isEqualTo(after(new byte[]{0x01}));
+		assertThat(range.clip(before(new byte[]{0x03, 0x01}))).isEqualTo(
+				before(new byte[]{0x03, 0x01}));
+		assertThat(range.clip(before(new byte[]{0x03, 0x03}))).isEqualTo(
+				before(new byte[]{0x03, 0x03}));
+		assertThat(range.clip(before(new byte[]{0x03, 0x04}))).isEqualTo(after(new byte[]{0x03}));
+
+		assertThat(range.clip(after(new byte[]{0x01, 0x00}))).isEqualTo(before(new byte[]{0x01, 0x01}));
+		assertThat(range.clip(after(new byte[]{0x01, 0x01}))).isEqualTo(after(new byte[]{0x01, 0x01}));
+		assertThat(range.clip(after(new byte[]{0x01, 0x02}))).isEqualTo(after(new byte[]{0x01, 0x02}));
+		assertThat(range.clip(after(new byte[]{0x01, 0x03}))).isEqualTo(after(new byte[]{0x01, 0x03}));
+		assertThat(range.clip(after(new byte[]{0x01, 0x03, 0x01}))).isEqualTo(
+				after(new byte[]{0x01, 0x03, 0x01}));
+		assertThat(range.clip(after(new byte[]{0x01, 0x04}))).isEqualTo(after(new byte[]{0x01}));
+		assertThat(range.clip(after(new byte[]{0x02, 0x03}))).isEqualTo(after(new byte[]{0x02, 0x03}));
+		assertThat(range.clip(after(new byte[]{0x03, 0x03}))).isEqualTo(after(new byte[]{0x03, 0x03}));
+		assertThat(range.clip(after(new byte[]{0x01}))).isEqualTo(after(new byte[]{0x01}));
+		assertThat(range.clip(after(new byte[]{0x02}))).isEqualTo(after(new byte[]{0x02}));
+		assertThat(range.clip(after(new byte[]{0x03}))).isEqualTo(after(new byte[]{0x03}));
+	}
+
+	@Test
+	public void restrict_open_open() {
 		var range = BytesRange.create(ImmutableList.of(Range.open((byte) 0x01, (byte) 0x03),
 				Range.open((byte) 0x01, (byte) 0x03)));
 
-		assertThat(range.max(before(new byte[]{0x01}))).isEqualTo(after(new byte[]{0x01}));
-		assertThat(range.max(before(new byte[]{0x01, 0x01}))).isEqualTo(after(new byte[]{0x01}));
-		assertThat(range.max(before(new byte[]{0x02}))).isEqualTo(after(new byte[]{0x02, 0x01}));
-		assertThat(range.max(before(new byte[]{0x02, 0x01}))).isEqualTo(after(new byte[]{0x02, 0x01}));
-		assertThat(range.max(before(new byte[]{0x02, 0x02}))).isEqualTo(before(new byte[]{0x02, 0x02}));
-		assertThat(range.max(before(new byte[]{0x02, 0x03}))).isEqualTo(after(new byte[]{0x02}));
+		assertThat(range.clip(before(new byte[]{0x01}))).isEqualTo(after(new byte[]{0x01}));
+		assertThat(range.clip(before(new byte[]{0x01, 0x01}))).isEqualTo(after(new byte[]{0x01}));
+		assertThat(range.clip(before(new byte[]{0x02}))).isEqualTo(after(new byte[]{0x02, 0x01}));
+		assertThat(range.clip(before(new byte[]{0x02, 0x01}))).isEqualTo(after(new byte[]{0x02, 0x01}));
+		assertThat(range.clip(before(new byte[]{0x02, 0x02}))).isEqualTo(
+				before(new byte[]{0x02, 0x02}));
+		assertThat(range.clip(before(new byte[]{0x02, 0x03}))).isEqualTo(after(new byte[]{0x02}));
 
-		assertThat(range.max(after(new byte[]{0x01}))).isEqualTo(after(new byte[]{0x01}));
-		assertThat(range.max(after(new byte[]{0x01, 0x01}))).isEqualTo(after(new byte[]{0x01, 0x01}));
-		assertThat(range.max(before(new byte[]{0x02}))).isEqualTo(after(new byte[]{0x02}));
-		assertThat(range.max(before(new byte[]{0x02, 0x01}))).isEqualTo(after(new byte[]{0x02, 0x01}));
-		assertThat(range.max(before(new byte[]{0x02, 0x02}))).isEqualTo(after(new byte[]{0x02, 0x02}));
-		assertThat(range.max(before(new byte[]{0x02, 0x03}))).isEqualTo(after(new byte[]{0x02}));
-		assertThat(range.max(before(new byte[]{0x03}))).isEqualTo(after(new byte[]{0x03}));
-		assertThat(range.max(before(new byte[]{0x03, 0x01}))).isEqualTo(after(new byte[]{0x03, 0x01}));
+		assertThat(range.clip(after(new byte[]{0x01}))).isEqualTo(after(new byte[]{0x01}));
+		assertThat(range.clip(after(new byte[]{0x01, 0x01}))).isEqualTo(after(new byte[]{0x01}));
+		assertThat(range.clip(before(new byte[]{0x02}))).isEqualTo(after(new byte[]{0x02, 0x01}));
+		assertThat(range.clip(before(new byte[]{0x02, 0x01}))).isEqualTo(after(new byte[]{0x02, 0x01}));
+		assertThat(range.clip(before(new byte[]{0x02, 0x02}))).isEqualTo(
+				before(new byte[]{0x02, 0x02}));
+		assertThat(range.clip(before(new byte[]{0x02, 0x03}))).isEqualTo(after(new byte[]{0x02}));
+		assertThat(range.clip(before(new byte[]{0x03}))).isEqualTo(before(new byte[]{0x03}));
+		assertThat(range.clip(before(new byte[]{0x03, 0x01}))).isEqualTo(
+				before(new byte[]{0x03, 0x01}));
+	}
+
+	@Test
+	public void restrict_openClosed_closedOpen() {
+		var range = BytesRange.create(ImmutableList.of(Range.openClosed((byte) 0x01, (byte) 0x03),
+				Range.closedOpen((byte) 0x01, (byte) 0x03)));
+
+		assertThat(range.clip(before(new byte[]{0x01}))).isEqualTo(after(new byte[]{0x01}));
+		assertThat(range.clip(before(new byte[]{0x01, 0x01}))).isEqualTo(after(new byte[]{0x01}));
+		assertThat(range.clip(before(new byte[]{0x02}))).isEqualTo(before(new byte[]{0x02, 0x01}));
+		assertThat(range.clip(before(new byte[]{0x02, 0x01}))).isEqualTo(
+				before(new byte[]{0x02, 0x01}));
+		assertThat(range.clip(before(new byte[]{0x02, 0x02}))).isEqualTo(
+				before(new byte[]{0x02, 0x02}));
+		assertThat(range.clip(before(new byte[]{0x02, 0x03}))).isEqualTo(after(new byte[]{0x02}));
+
+		assertThat(range.clip(after(new byte[]{0x01}))).isEqualTo(after(new byte[]{0x01}));
+		assertThat(range.clip(after(new byte[]{0x01, 0x01}))).isEqualTo(after(new byte[]{0x01}));
+		assertThat(range.clip(after(new byte[]{0x02}))).isEqualTo(after(new byte[]{0x02}));
+		assertThat(range.clip(after(new byte[]{0x02, 0x00}))).isEqualTo(before(new byte[]{0x02, 0x01}));
+		assertThat(range.clip(after(new byte[]{0x02, 0x01}))).isEqualTo(after(new byte[]{0x02, 0x01}));
 	}
 }
