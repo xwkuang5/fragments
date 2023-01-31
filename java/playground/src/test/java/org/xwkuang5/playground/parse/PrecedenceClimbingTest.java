@@ -1,5 +1,6 @@
 package org.xwkuang5.playground.parse;
 
+import static org.junit.Assert.assertThrows;
 import static com.google.common.truth.Truth.assertThat;
 import static org.xwkuang5.playground.parse.PrecedenceClimbing.evaluate;
 import static org.xwkuang5.playground.parse.PrecedenceClimbing.Atom.value;
@@ -10,6 +11,20 @@ import org.junit.jupiter.api.Test;
 import org.xwkuang5.playground.parse.PrecedenceClimbing.Operator;
 
 final class PrecedenceClimbingTest {
+
+	@Test
+	public void operatorAndOperandDoNotMatch() {
+		assertThrows(IllegalArgumentException.class,
+				() -> evaluate(ImmutableList.of(value(1), value(2))));
+
+		assertThrows(IllegalArgumentException.class,
+				() -> evaluate(ImmutableList.of(value(1), op(Operator.PLUS), op(Operator.PLUS))));
+	}
+
+	@Test
+	public void singleValue() {
+		assertThat(evaluate(ImmutableList.of(value(1)))).isEqualTo(1);
+	}
 
 	@Test
 	public void plus() {
