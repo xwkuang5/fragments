@@ -27,10 +27,33 @@ final class PrecedenceClimbingTest {
 	}
 
 	@Test
+	public void singleValue_parenthesis() {
+		assertThat(evaluate(
+				ImmutableList.of(op(Operator.LEFT_PAREN), value(1), op(Operator.RIGHT_PAREN)))).isEqualTo(
+				1);
+	}
+
+	@Test
+	public void singleValue_parentheses() {
+		assertThat(evaluate(
+				ImmutableList.of(op(Operator.LEFT_PAREN), op(Operator.LEFT_PAREN), value(1),
+						op(Operator.RIGHT_PAREN), op(Operator.RIGHT_PAREN)))).isEqualTo(
+				1);
+	}
+
+	@Test
 	public void plus() {
 		assertThat(evaluate(ImmutableList.of(value(1), op(Operator.PLUS), value(1)))).isEqualTo(2);
 		assertThat(evaluate(ImmutableList.of(value(1), op(Operator.PLUS), value(1), op(Operator.PLUS),
 				value(1)))).isEqualTo(3);
+	}
+
+	@Test
+	public void plus_parenthesis() {
+		assertThat(evaluate(
+				ImmutableList.of(value(1), op(Operator.PLUS), op(Operator.LEFT_PAREN), value(1),
+						op(Operator.PLUS),
+						value(1), op(Operator.RIGHT_PAREN)))).isEqualTo(3);
 	}
 
 	@Test
@@ -69,6 +92,22 @@ final class PrecedenceClimbingTest {
 				ImmutableList.of(value(2), op(Operator.PLUS), value(2), op(Operator.MULTIPLY), value(10),
 						op(Operator.DIVIDE), value(2), op(Operator.EXP), value(2), op(Operator.MINUS),
 						value(1)))).isEqualTo(6);
+
+		assertThat(evaluate(
+				ImmutableList.of(value(2), op(Operator.PLUS), value(2), op(Operator.MULTIPLY),
+						op(Operator.LEFT_PAREN), value(10),
+						op(Operator.DIVIDE), value(2), op(Operator.RIGHT_PAREN), op(Operator.EXP), value(2),
+						op(Operator.MINUS),
+						value(1)))).isEqualTo(51);
+
+		assertThat(evaluate(
+				ImmutableList.of(value(2), op(Operator.PLUS), op(Operator.LEFT_PAREN), value(2),
+						op(Operator.MULTIPLY),
+						op(Operator.LEFT_PAREN), value(10),
+						op(Operator.DIVIDE), value(2), op(Operator.RIGHT_PAREN), op(Operator.RIGHT_PAREN),
+						op(Operator.EXP), value(2),
+						op(Operator.MINUS),
+						value(1)))).isEqualTo(101);
 
 		assertThat(evaluate(
 				ImmutableList.of(value(2), op(Operator.MINUS), value(10), op(Operator.DIVIDE), value(2),

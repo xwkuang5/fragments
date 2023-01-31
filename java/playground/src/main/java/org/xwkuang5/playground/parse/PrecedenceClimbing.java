@@ -1,6 +1,7 @@
 package org.xwkuang5.playground.parse;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.google.auto.value.AutoOneOf;
 import com.google.common.collect.Iterators;
@@ -9,6 +10,19 @@ import java.util.Iterator;
 import java.util.stream.IntStream;
 import org.xwkuang5.playground.parse.PrecedenceClimbing.Atom.Type;
 
+/**
+ * A simple arithmetic expression parser that handles parentheses, operator precedence and
+ * associativity.
+ *
+ * <p>Associativity is handled by bumping their precedence to precede over other operators of the
+ * same precedence (technically a fractional bump is enough).
+ *
+ * <p>Parentheses are handled by treating the sub-expressions that they represent as a single value
+ * that need to be evaluated before anything else.
+ *
+ * <p><a
+ * href="https://eli.thegreenplace.net/2012/08/02/parsing-expressions-by-precedence-climbing">Reference</a>
+ */
 final class PrecedenceClimbing {
 
 	enum Associativity {
@@ -20,7 +34,8 @@ final class PrecedenceClimbing {
 	 */
 	enum Operator {
 		PLUS(1, Associativity.LEFT), MINUS(1, Associativity.LEFT), MULTIPLY(2,
-				Associativity.LEFT), DIVIDE(2, Associativity.LEFT), EXP(3, Associativity.RIGHT);
+				Associativity.LEFT), DIVIDE(2, Associativity.LEFT), EXP(3, Associativity.RIGHT), LEFT_PAREN(
+				100, Associativity.LEFT), RIGHT_PAREN(100, Associativity.LEFT);
 
 		static final int MINIMUM_PRECEDENCE = 0;
 
@@ -66,8 +81,9 @@ final class PrecedenceClimbing {
 			var nextAtom = atoms.peek();
 			checkArgument(nextAtom.type().equals(Type.OPERATOR),
 					"expected atom of operator type but got %s", nextAtom);
-
-			if (nextAtom.operator().precedence < minimumPrecedence) {
+			checkState(!nextAtom.operator().equals(Operator.LEFT_PAREN));
+			if (nextAtom.operator().equals(Operator.RIGHT_PAREN)
+					|| nextAtom.operator().precedence < minimumPrecedence) {
 				break;
 			}
 
@@ -95,13 +111,28 @@ final class PrecedenceClimbing {
 			case MULTIPLY -> left * right;
 			case DIVIDE -> left / right;
 			case EXP -> IntStream.generate(() -> left).limit(right).reduce((l, r) -> l * r).orElseThrow();
+			// fall through
+			case LEFT_PAREN, RIGHT_PAREN -> throw new IllegalStateException("ah oh");
 		};
 	}
 
 	private static int consumeValue(Iterator<Atom> atoms) {
 		checkArgument(atoms.hasNext(), "can not consume value from an empty iterator");
 		var atom = atoms.next();
-		checkArgument(atom.type().equals(Type.VALUE), "expected atom of value type but got %s", atom);
-		return atom.value();
+		switch (atom.type()) {
+			case VALUE:
+				return atom.value();
+			case OPERATOR: {
+				if (atom.operator().equals(Operator.LEFT_PAREN)) {
+					int result = evaluate(0, Iterators.peekingIterator(atoms));
+					checkArgument(atoms.hasNext());
+					checkArgument(atoms.next().operator().equals(Operator.RIGHT_PAREN));
+					return result;
+				}
+				throw new IllegalArgumentException(
+						String.format("expected atom of value type but got %s", atom));
+			}
+		}
+		throw new AssertionError("impossible");
 	}
 }
