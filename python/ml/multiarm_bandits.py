@@ -1,6 +1,4 @@
 import numpy as np
-import streamlit as st
-import pandas as pd
 
 # TODO: pull the streamlit app out to someplace else
 # TODO: structure the app into packages and subpackages for better separation of concerns
@@ -175,7 +173,7 @@ class OptimalPlayer:
         of one regardless of the environment.
         """
 
-        return np.argmax(thetas)
+        return np.argmax(self._thetas)
 
     def observe_action_reward_pair(self, action, reward):
         """Record action reward pairs
@@ -394,37 +392,3 @@ def play_game(environment, list_of_players, n):
 
     return reward_history
 
-
-thetas_input = st.text_input("Biases (average action reward) of the arms (coins)", value="1,1,1,1")
-
-thetas = [float(val) for val in thetas_input.split(",")]
-
-assert len(thetas) >= 1, "The number of arms must not be zero"
-assert all(0 <= val <= 1 for val in thetas), "All biases must be between 0 and 1"
-
-num_arms = len(thetas)
-
-# initialize the multi-armed bandits environment
-environment = MultiArmedBandits(num_arms, thetas)
-
-# initialize the thompson sampling player with one round of simulation
-thompson_sampler = ThompsonSampler(num_arms, 1)
-
-# initialize the upper confidence bound player
-ucb_player = UCBPlayer(num_arms)
-
-# initialize the optimal player with the biases of the arms (coins)
-optimal_player = OptimalPlayer(num_arms, thetas)
-
-# initialize the greedy player with random play probability 0.1
-greedy_player = EpsilonGreedyPlayer(num_arms, epsilon=.1)
-
-list_of_players = [optimal_player, greedy_player, ucb_player, thompson_sampler]
-
-num_rounds = st.number_input('Number of rounds to simulate for', min_value=1, value=100)
-
-reward_history = play_game(environment, list_of_players, num_rounds)
-
-df = pd.DataFrame(reward_history.transpose(), columns=list_of_players)
-
-st.line_chart(df)
