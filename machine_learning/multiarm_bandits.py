@@ -1,11 +1,9 @@
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
-
 import numpy as np
+import streamlit as st
+import pandas as pd
 
-from functools import partial
-
+# TODO: pull the streamlit app out to someplace else
+# TODO: structure the app into packages and subpackages for better separation of concerns
 
 class MultiArmedBandits:
     """Implement a multi-armed bandits environment
@@ -383,15 +381,12 @@ def play_game(environment, list_of_players, n):
             reward_history[idx] = reward_history[idx] + [reward]
 
     reward_history = np.cumsum(np.array(reward_history), axis=1)
-    """
-    Print out the avg reward estimates by the UCB and the Thompson
-    Sampling player. If the agents are really learning, the estimate
-    should rank the action similar to that of the thetas parameters
-    used by the environment
-
-    It would be cool to do a heat map visualization of the transition 
-    of beliefs
-    """
+    # Print out the avg reward estimates by the UCB and the Thompson
+    # Sampling player. If the agents are really learning, the estimate
+    # should rank the action similar to that of the thetas parameters
+    # used by the environment
+    # It would be cool to do a heat map visualization of the transition 
+    # of beliefs
     print("Environment parameters: {}".format(environment._thetas))
     print("UCB estimate: {}".format(list_of_players[-2].get_play_estimate()))
     print("ThomsonSampling estimate: {}".format(
@@ -400,10 +395,14 @@ def play_game(environment, list_of_players, n):
     return reward_history
 
 
-# number of arms (coins)
-num_arms = 5
-# biases (average action reward) of the arms (coins)
-thetas = [0.1, 0.7, 0.5, 0.3, 0.1]
+thetas_input = st.text_input("Biases (average action reward) of the arms (coins)", value="1,1,1,1")
+
+thetas = [float(val) for val in thetas_input.split(",")]
+
+assert len(thetas) >= 1, "The number of arms must not be zero"
+assert all(0 <= val <= 1 for val in thetas), "All biases must be between 0 and 1"
+
+num_arms = len(thetas)
 
 # initialize the multi-armed bandits environment
 environment = MultiArmedBandits(num_arms, thetas)
@@ -422,28 +421,10 @@ greedy_player = EpsilonGreedyPlayer(num_arms, epsilon=.1)
 
 list_of_players = [optimal_player, greedy_player, ucb_player, thompson_sampler]
 
-# plot player performance vs number of rounds played
-num_rounds = [10**i for i in range(1, 6)]
+num_rounds = st.number_input('Number of rounds to simulate for', min_value=1, value=100)
 
-plt.rcParams["figure.figsize"] = (10, len(num_rounds) * 2)
+reward_history = play_game(environment, list_of_players, num_rounds)
 
-fig, axarr = plt.subplots(nrows=len(num_rounds), ncols=1)
+df = pd.DataFrame(reward_history.transpose(), columns=list_of_players)
 
-for idx, round_ in enumerate(num_rounds):
-
-    reward_history = play_game(environment, list_of_players, round_)
-
-    axarr[idx].plot(reward_history[0], 'b', label='Optimal Player')
-    axarr[idx].plot(reward_history[1], 'g', label='Greedy Player')
-    axarr[idx].plot(reward_history[2], 'r', label='UCB Player')
-    axarr[idx].plot(reward_history[3], 'c', label='Thompson Sampler')
-
-    axarr[idx].legend()
-    axarr[idx].set_xlabel('iteration')
-    axarr[idx].set_ylabel('total reward')
-
-    for player in list_of_players:
-        player.reset()
-
-plt.tight_layout()
-plt.savefig("figures/multi-armed_experiment.png")
+st.line_chart(df)
