@@ -12,4 +12,3 @@ This repository contains codes that I wrote when learning new algorithms/techniq
   * `pattern`: directory for progamming patterns
   * `ml`: directory for algorithms related to Machine Learning
   * `stats`: directory for codes for statistics
-  * `streamlit`: streamlit apps for visualizing different algorithms
