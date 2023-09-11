@@ -1,0 +1,22 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pyfragments_xwkuang5"
+version = "0.0.3"
+authors = [
+  { name="Louis Kuang", email="louisconfussing@gmail.com" },
+]
+description = "Python code fragments"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/xwkuang5/fragments/python"
+"Bug Tracker" = "https://github.com/xwkuang5/fragments/issues"

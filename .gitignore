@@ -5,6 +5,8 @@ tSNE
 Datasets
 __pycache__
 
+dist
+
 .gradle
 **/build/
 !src/**/build/
