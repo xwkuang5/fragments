@@ -6,9 +6,7 @@ import com.google.auto.value.AutoOneOf;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Stack;
-import java.util.Vector;
 import java.util.stream.Collectors;
 
 /**
@@ -59,81 +57,104 @@ public final class SimplePDA {
 		}
 	}
 
-	private List<Stack<Symbol>> stacks;
+	private static class PDAStack {
+
+		private final Stack<Symbol> stack;
+
+		private static PDAStack create(Iterable<Symbol> forwardSymbols) {
+			Stack<Symbol> symbols = new Stack<>();
+			ImmutableList.copyOf(forwardSymbols).reverse().forEach(symbols::push);
+			return new PDAStack(symbols);
+		}
+
+		private PDAStack(Stack<Symbol> stack) {
+			this.stack = stack;
+		}
+
+		private PDAStack fork() {
+			Stack<Symbol> cloned = (Stack<Symbol>) stack.clone();
+			return new PDAStack(cloned);
+		}
+
+		private boolean isAccepting() {
+			return stack.isEmpty();
+		}
+
+		private boolean canAdvance() {
+			return !stack.isEmpty() && !stack.peek().isTerminal();
+		}
+
+		private ImmutableList<PDAStack> nonDeterministicallyAdvance() {
+			List<PDAStack> threads = new ArrayList<>();
+			threads.add(this);
+			boolean madeProgress = true;
+			// This loop has an assumption that the grammar will not expand into an infinite loop when substituting variables.
+			while (madeProgress) {
+				List<PDAStack> newThreads = new ArrayList<>();
+				madeProgress = false;
+				// for each active threads, try to advance it so that the stack either becomes empty or the top of the stack is a terminal.
+				for (var thread : threads) {
+					if (!thread.canAdvance()) {
+						newThreads.add(thread);
+						continue;
+					}
+					var top = thread.stack.pop();
+					checkState(top.isVariable());
+					var replacements = replaceVariable(top.variable());
+					checkState(!replacements.isEmpty());
+					madeProgress = true;
+					// for each replacement, fork the current thread and push the replacement onto the thread
+					for (var sequence : replacements) {
+						PDAStack newThread = thread.fork();
+						sequence.reverse().forEach(newThread.stack::push);
+						newThreads.add(newThread);
+					}
+				}
+				if (madeProgress) {
+					threads = newThreads;
+				}
+			}
+
+			return ImmutableList.copyOf(threads);
+		}
+
+		private ImmutableList<PDAStack> tryAdvance(char c) {
+			if (stack.isEmpty()) {
+				return ImmutableList.of();
+			}
+
+			Symbol top = stack.pop();
+			checkState(top.isTerminal());
+
+			if (top.terminal() != c) {
+				return ImmutableList.of();
+			}
+
+			return nonDeterministicallyAdvance();
+		}
+	}
+
+	private List<PDAStack> stacks;
 
 	private SimplePDA() {
 		this.stacks = initStack();
 	}
 
-	private static List<Stack<Symbol>> initStack() {
-		return replaceVariable(Variable.S).stream().map(ImmutableList::reverse)
-				.map(reversedExpansion -> {
-					Stack<Symbol> symbols = new Stack<>();
-					reversedExpansion.forEach(symbols::push);
-					return symbols;
-				}).collect(Collectors.toList());
+	private static List<PDAStack> initStack() {
+		return replaceVariable(Variable.S).stream().map(PDAStack::create).collect(Collectors.toList());
 	}
 
 	/**
 	 * Recursively replaces the top of the stack with the derivation if it is a variable type.
 	 */
 	private void advance(char c) {
-		List<Stack<Symbol>> newStacks = new ArrayList<>();
+		List<PDAStack> newStacks = new ArrayList<>();
 
-		for (Stack<Symbol> cur : stacks) {
-			advanceStack(cur, c).ifPresent(newStacks::addAll);
+		for (PDAStack cur : stacks) {
+			newStacks.addAll(cur.tryAdvance(c));
 		}
 
 		this.stacks = newStacks;
-	}
-
-	private static Optional<List<Stack<Symbol>>> advanceStack(Stack<Symbol> stack, char c) {
-		if (stack.isEmpty()) {
-			return Optional.empty();
-		}
-
-		Symbol top = stack.pop();
-		checkState(top.isTerminal());
-
-		if (top.terminal() != c) {
-			return Optional.empty();
-		}
-
-		List<Stack<Symbol>> threads = new ArrayList<>();
-		threads.add(stack);
-		boolean madeProgress = true;
-		// This loop has an assumption that the grammar will not expand into an infinite loop when substituting variables.
-		while (madeProgress) {
-			List<Stack<Symbol>> newThreads = new ArrayList<>();
-			madeProgress = false;
-			// for each active threads, try to advance it so that the stack either becomes empty or the top of the stack is a terminal.
-			for (var thread : threads) {
-				if (thread.isEmpty()) {
-					newThreads.add(thread);
-					continue;
-				}
-				Symbol head = thread.peek();
-				if (head.isTerminal()) {
-					newThreads.add(thread);
-					continue;
-				}
-				head = thread.pop();
-				var replacements = replaceVariable(head.variable());
-				checkState(!replacements.isEmpty());
-				madeProgress = true;
-				// for each replacement, fork the current thread and push the replacement onto the thread
-				for (var sequence : replacements) {
-					Stack<Symbol> newThread = (Stack<Symbol>) thread.clone();
-					sequence.reverse().forEach(newThread::push);
-					newThreads.add(newThread);
-				}
-			}
-			if (madeProgress) {
-				threads = newThreads;
-			}
-		}
-
-		return Optional.of(threads);
 	}
 
 	private static ImmutableList<ImmutableList<Symbol>> replaceVariable(Variable variable) {
@@ -170,9 +191,6 @@ public final class SimplePDA {
 		if (pda.stacks.isEmpty()) {
 			return false;
 		}
-		return pda.stacks.stream().anyMatch(Vector::isEmpty);
-	}
-
-	public static void main(String[] args) {
+		return pda.stacks.stream().anyMatch(PDAStack::isAccepting);
 	}
 }
